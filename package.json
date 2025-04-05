@@ -5,8 +5,11 @@
   "author": "e22m4u <e22m4u@yandex.ru>",
   "license": "MIT",
   "keywords": [
+    "log",
     "debug",
-    "debugger"
+    "logging",
+    "debugger",
+    "interpolation"
   ],
   "homepage": "https://github.com/e22m4u/js-debug",
   "repository": {
