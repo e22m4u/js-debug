@@ -36,7 +36,7 @@ debug('Получены значения %l.', ['foo', 10, true]);
 // Получены значения "foo", 10, true.
 ```
 
-Вывод содержания объекта.
+Дамп объекта.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -58,7 +58,7 @@ debug({
 // }
 ```
 
-Вывод описания объекта.
+Дополнительное сообщение над дампом.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
