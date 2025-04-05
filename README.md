@@ -30,10 +30,10 @@ const {createDebugger} = require('@e22m4u/js-debug');
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-debug('Получено значение %v.', 100);
-debug('Получены значения %l.', ['foo', 10, true]);
-// Получено значение 100.
-// Получены значения "foo", 10, true.
+debug('Got value %v.', 100);
+debug('Got values %l.', ['foo', 10, true]);
+// Got value 100.
+// Got values "foo", 10, true.
 ```
 
 Дамп значений.
@@ -68,9 +68,9 @@ debug({
   orderId: 988,
   date: '2023-10-27',
   totalAmount: 120.50,
-}, 'Детали заказа:');
+}, 'Order details:');
 
-// Детали заказа:
+// Order details:
 // {
 //   orderId: 988,
 //   date: '2023-10-27',
@@ -125,13 +125,13 @@ const debug1 = createDebugger().withHash();
 debug1('Hi John');
 debug1('Hi Tommy');
 // r34s Hi John
-// r34s Hi John
+// r34s Hi Tommy
 
 const debug2 = createDebugger().withHash();
 debug2('Hi John');
 debug2('Hi Tommy');
 // ier0 Hi John
-// ier0 Hi John
+// ier0 Hi Tommy
 ```
 
 Определение длины хэша.
@@ -178,13 +178,13 @@ const contact = {
   },
 }
 
-debug('Обход участников программы.');
-debugWo1('Проверка контактов %v-го участника.', 1);
-debugWo1(contact, 'Контакты участника:');
+debug('Iterating over %v participants.', 10);
+debugWo1('Looking for contacts of %v participant.', 1);
+debugWo1(contact, 'Participant contacts found:');
 
-// myApp:myService:o3pk Обход участников программы.
-// myApp:myService:o3pk   Проверка контактов 1-го участника.
-// myApp:myService:o3pk   Контакт участника:
+// myApp:myService:o3pk Iterating over 10 participants.
+// myApp:myService:o3pk   Looking for contacts of 1 participant.
+// myApp:myService:o3pk   Participant contacts found:
 // myApp:myService:o3pk   {
 // myApp:myService:o3pk     email: 'john.doe@example.com',
 // myApp:myService:o3pk     phone: {
