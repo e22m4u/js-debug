@@ -94,9 +94,15 @@ debug({
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
-const debug = createDebugger('myApp');
-debug('Hello world');
+const debug1 = createDebugger('myApp');
+const debug2 = createDebugger('myApp', 'myService');
+const debug3 = createDebugger('myApp:myService');
+debug1('Hello world');
+debug2('Hello world');
+debug3('Hello world');
 // myApp Hello world
+// myApp:myService Hello world
+// myApp:myService Hello world
 ```
 
 Использование пространства имен из переменной окружения.
@@ -111,7 +117,7 @@ debug('Hello world');
 // myApp Hello world
 ```
 
-Расширение пространства имен.
+Расширение сегментов пространства имен.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';

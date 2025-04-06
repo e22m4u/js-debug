@@ -174,6 +174,26 @@ describe('createDebugger', function () {
       );
     });
 
+    it('should use multiple namespace segments provided in createDebugger', function () {
+      process.env.DEBUG = 'app:service:module';
+      const debug = createDebugger('app', 'service', 'module');
+      debug('multi segment message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'app:service:module multi segment message',
+      );
+    });
+
+    it('should handle subsequent segments even if the first arg is the only namespace part', function () {
+      process.env.DEBUG = 'service:module';
+      const debug = createDebugger('service', 'module');
+      debug('segments only message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'service:module segments only message',
+      );
+    });
+
     it('should use namespace from DEBUGGER_NAMESPACE env variable', function () {
       process.env.DEBUGGER_NAMESPACE = 'base';
       // должен быть включен для вывода
@@ -196,6 +216,17 @@ describe('createDebugger', function () {
       );
     });
 
+    it('should combine DEBUGGER_NAMESPACE and multiple createDebugger segments', function () {
+      process.env.DEBUGGER_NAMESPACE = 'base';
+      process.env.DEBUG = 'base:app:svc';
+      const debug = createDebugger('app', 'svc');
+      debug('env plus multi segment message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'base:app:svc env plus multi segment message',
+      );
+    });
+
     it('should extend namespace with withNs()', function () {
       process.env.DEBUG = 'app:service';
       const debugApp = createDebugger('app');
@@ -203,6 +234,17 @@ describe('createDebugger', function () {
       debugService('message');
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
         'app:service message',
+      );
+    });
+
+    it('should extend namespace with withNs() after creating with multiple segments', function () {
+      process.env.DEBUG = 'app:svc:mod';
+      const debugBase = createDebugger('app', 'svc');
+      const debugMod = debugBase.withNs('mod');
+      debugMod('multi create then withNs');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'app:svc:mod multi create then withNs',
       );
     });
 
@@ -223,6 +265,21 @@ describe('createDebugger', function () {
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
         'app:service:module message',
       );
+    });
+
+    it('should throw error if createDebugger is called with invalid subsequent segment type', function () {
+      expect(() => createDebugger('app', 'valid', 123)).to.throw(
+        /Namespace segment must be a non-empty String/,
+      );
+      expect(() => createDebugger('app', 'valid', null)).to.throw(
+        /Namespace segment must be a non-empty String/,
+      );
+      expect(() => createDebugger('app', 'valid', '')).to.throw(
+        /Namespace segment must be a non-empty String/,
+      );
+      expect(() => createDebugger('app', '')).to.throw(
+        /Namespace segment must be a non-empty String/,
+      ); // Также проверяем пустой второй сегмент
     });
 
     it('should throw error if withNs is called with non-string', function () {

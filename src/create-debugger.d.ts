@@ -49,6 +49,12 @@ export interface Debugger {
 /**
  * Create debugger.
  *
- * @param namespace
+ * @param namespace Сегмент пространства имен.
+ * @param namespaceSegments Дополнительные сегменты пространства имен для
+ *   добавления.
+ * @returns Новый экземпляр Debugger.
  */
-export declare function createDebugger(namespace: string): Debugger;
+export declare function createDebugger(
+  namespace?: string,
+  ...namespaceSegments: string[],
+): Debugger;

@@ -183,7 +183,7 @@ function matchPattern(pattern, input) {
   return regexp.test(input);
 }
 __name(matchPattern, "matchPattern");
-function createDebugger(namespaceOrOptions = void 0) {
+function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   if (namespaceOrOptions && typeof namespaceOrOptions !== "string" && !isNonArrayObject(namespaceOrOptions)) {
     throw new import_js_format.Errorf(
       'The parameter "namespace" of the function createDebugger must be a String or an Object, but %v given.',
@@ -191,24 +191,32 @@ function createDebugger(namespaceOrOptions = void 0) {
     );
   }
   const state = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
-  state.nsArr = Array.isArray(state.nsArr) ? state.nsArr : [];
+  state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === "string" ? state.pattern : "";
   state.hash = typeof state.hash === "string" ? state.hash : "";
   state.offsetSize = typeof state.offsetSize === "number" ? state.offsetSize : 0;
   state.offsetStep = typeof state.offsetStep === "string" ? state.offsetStep : "   ";
   state.delimiter = state.delimiter && typeof state.delimiter === "string" ? state.delimiter : ":";
   if (typeof process !== "undefined" && process.env && process.env["DEBUGGER_NAMESPACE"]) {
-    state.nsArr.push(process.env.DEBUGGER_NAMESPACE);
+    state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
   }
   if (typeof namespaceOrOptions === "string")
-    state.nsArr.push(namespaceOrOptions);
+    state.nsSegments.push(namespaceOrOptions);
+  namespaceSegments.forEach((segment) => {
+    if (!segment || typeof segment !== "string")
+      throw new import_js_format.Errorf(
+        "Namespace segment must be a non-empty String, but %v given.",
+        segment
+      );
+    state.nsSegments.push(segment);
+  });
   if (typeof process !== "undefined" && process.env && process.env["DEBUG"]) {
     state.pattern = process.env["DEBUG"];
   } else if (typeof localStorage !== "undefined" && typeof localStorage.getItem("debug") === "string") {
     state.pattern = localStorage.getItem("debug");
   }
   const isDebuggerEnabled = /* @__PURE__ */ __name(() => {
-    const nsStr = state.nsArr.join(state.delimiter);
+    const nsStr = state.nsSegments.join(state.delimiter);
     const patterns = state.pattern.split(/[\s,]+/).filter((p) => p.length > 0);
     if (patterns.length === 0 && state.pattern !== "*") return false;
     for (const singlePattern of patterns) {
@@ -218,7 +226,7 @@ function createDebugger(namespaceOrOptions = void 0) {
   }, "isDebuggerEnabled");
   const getPrefix = /* @__PURE__ */ __name(() => {
     let tokens = [];
-    [...state.nsArr, state.hash].filter(Boolean).forEach((token) => {
+    [...state.nsSegments, state.hash].filter(Boolean).forEach((token) => {
       const extractedTokens = token.split(state.delimiter).filter(Boolean);
       tokens = [...tokens, ...extractedTokens];
     });
@@ -255,7 +263,7 @@ function createDebugger(namespaceOrOptions = void 0) {
           "Debugger namespace must be a non-empty String, but %v given.",
           ns
         );
-      stCopy.nsArr.push(ns);
+      stCopy.nsSegments.push(ns);
     });
     return createDebugger(stCopy);
   };

@@ -113,9 +113,13 @@ function matchPattern(pattern, input) {
  * Create debugger.
  *
  * @param {string} namespaceOrOptions
+ * @param {string[]} namespaceSegments
  * @returns {Function}
  */
-export function createDebugger(namespaceOrOptions = undefined) {
+export function createDebugger(
+  namespaceOrOptions = undefined,
+  ...namespaceSegments
+) {
   // если первый аргумент не является строкой
   // и объектом, то выбрасывается ошибка
   if (
@@ -132,7 +136,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // формирование состояния отладчика
   // для хранения текущих настроек
   const state = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
-  state.nsArr = Array.isArray(state.nsArr) ? state.nsArr : [];
+  state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === 'string' ? state.pattern : '';
   state.hash = typeof state.hash === 'string' ? state.hash : '';
   state.offsetSize =
@@ -151,12 +155,22 @@ export function createDebugger(namespaceOrOptions = undefined) {
     process.env &&
     process.env['DEBUGGER_NAMESPACE']
   ) {
-    state.nsArr.push(process.env.DEBUGGER_NAMESPACE);
+    state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
   }
   // если первый аргумент содержит значение,
   // то оно используется как пространство имен
   if (typeof namespaceOrOptions === 'string')
-    state.nsArr.push(namespaceOrOptions);
+    state.nsSegments.push(namespaceOrOptions);
+  // проверка типа дополнительных сегментов пространства
+  // имен, и добавление их в общий набор сегментов
+  namespaceSegments.forEach(segment => {
+    if (!segment || typeof segment !== 'string')
+      throw new Errorf(
+        'Namespace segment must be a non-empty String, but %v given.',
+        segment,
+      );
+    state.nsSegments.push(segment);
+  });
   // если переменная окружения DEBUG содержит
   // значение, то оно используется как шаблон
   if (typeof process !== 'undefined' && process.env && process.env['DEBUG']) {
@@ -174,7 +188,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // формирование функции для проверки
   // активности текущего отладчика
   const isDebuggerEnabled = () => {
-    const nsStr = state.nsArr.join(state.delimiter);
+    const nsStr = state.nsSegments.join(state.delimiter);
     const patterns = state.pattern.split(/[\s,]+/).filter(p => p.length > 0);
     if (patterns.length === 0 && state.pattern !== '*') return false;
     for (const singlePattern of patterns) {
@@ -186,7 +200,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // для сообщений отладки
   const getPrefix = () => {
     let tokens = [];
-    [...state.nsArr, state.hash].filter(Boolean).forEach(token => {
+    [...state.nsSegments, state.hash].filter(Boolean).forEach(token => {
       const extractedTokens = token.split(state.delimiter).filter(Boolean);
       tokens = [...tokens, ...extractedTokens];
     });
@@ -226,7 +240,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
           'Debugger namespace must be a non-empty String, but %v given.',
           ns,
         );
-      stCopy.nsArr.push(ns);
+      stCopy.nsSegments.push(ns);
     });
     return createDebugger(stCopy);
   };
