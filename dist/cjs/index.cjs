@@ -190,40 +190,46 @@ function createDebugger(namespaceOrOptions = void 0) {
       namespaceOrOptions
     );
   }
-  const st = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
-  st.nsArr = Array.isArray(st.nsArr) ? st.nsArr : [];
-  st.pattern = typeof st.pattern === "string" ? st.pattern : "";
-  st.hash = typeof st.hash === "string" ? st.hash : "";
-  st.offsetSize = typeof st.offsetSize === "number" ? st.offsetSize : 0;
-  st.offsetStep = typeof st.offsetStep === "string" ? st.offsetStep : "   ";
+  const state = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
+  state.nsArr = Array.isArray(state.nsArr) ? state.nsArr : [];
+  state.pattern = typeof state.pattern === "string" ? state.pattern : "";
+  state.hash = typeof state.hash === "string" ? state.hash : "";
+  state.offsetSize = typeof state.offsetSize === "number" ? state.offsetSize : 0;
+  state.offsetStep = typeof state.offsetStep === "string" ? state.offsetStep : "   ";
+  state.delimiter = state.delimiter && typeof state.delimiter === "string" ? state.delimiter : ":";
   if (typeof process !== "undefined" && process.env && process.env["DEBUGGER_NAMESPACE"]) {
-    st.nsArr.push(process.env.DEBUGGER_NAMESPACE);
+    state.nsArr.push(process.env.DEBUGGER_NAMESPACE);
   }
-  if (typeof namespaceOrOptions === "string") st.nsArr.push(namespaceOrOptions);
+  if (typeof namespaceOrOptions === "string")
+    state.nsArr.push(namespaceOrOptions);
   if (typeof process !== "undefined" && process.env && process.env["DEBUG"]) {
-    st.pattern = process.env["DEBUG"];
+    state.pattern = process.env["DEBUG"];
   } else if (typeof localStorage !== "undefined" && typeof localStorage.getItem("debug") === "string") {
-    st.pattern = localStorage.getItem("debug");
+    state.pattern = localStorage.getItem("debug");
   }
   const isDebuggerEnabled = /* @__PURE__ */ __name(() => {
-    const nsStr = st.nsArr.join(":");
-    const patterns = st.pattern.split(/[\s,]+/).filter((p) => p.length > 0);
-    if (patterns.length === 0 && st.pattern !== "*") return false;
+    const nsStr = state.nsArr.join(state.delimiter);
+    const patterns = state.pattern.split(/[\s,]+/).filter((p) => p.length > 0);
+    if (patterns.length === 0 && state.pattern !== "*") return false;
     for (const singlePattern of patterns) {
       if (matchPattern(singlePattern, nsStr)) return true;
     }
     return false;
   }, "isDebuggerEnabled");
   const getPrefix = /* @__PURE__ */ __name(() => {
-    const tokens = [...st.nsArr, st.hash].filter(Boolean);
+    let tokens = [];
+    [...state.nsArr, state.hash].filter(Boolean).forEach((token) => {
+      const extractedTokens = token.split(state.delimiter).filter(Boolean);
+      tokens = [...tokens, ...extractedTokens];
+    });
     let res = tokens.reduce((acc, token, index) => {
       const isLast = tokens.length - 1 === index;
       const tokenColor = pickColorCode(token);
       acc += wrapStringByColorCode(token, tokenColor);
-      if (!isLast) acc += ":";
+      if (!isLast) acc += state.delimiter;
       return acc;
     }, "");
-    if (st.offsetSize > 0) res += st.offsetStep.repeat(st.offsetSize);
+    if (state.offsetSize > 0) res += state.offsetStep.repeat(state.offsetSize);
     return res;
   }, "getPrefix");
   function debugFn(messageOrData, ...args) {
@@ -242,7 +248,7 @@ function createDebugger(namespaceOrOptions = void 0) {
   }
   __name(debugFn, "debugFn");
   debugFn.withNs = function(namespace, ...args) {
-    const stCopy = JSON.parse(JSON.stringify(st));
+    const stCopy = JSON.parse(JSON.stringify(state));
     [namespace, ...args].forEach((ns) => {
       if (!ns || typeof ns !== "string")
         throw new import_js_format.Errorf(
@@ -254,7 +260,7 @@ function createDebugger(namespaceOrOptions = void 0) {
     return createDebugger(stCopy);
   };
   debugFn.withHash = function(hashLength = 4) {
-    const stCopy = JSON.parse(JSON.stringify(st));
+    const stCopy = JSON.parse(JSON.stringify(state));
     if (!hashLength || typeof hashLength !== "number" || hashLength < 1) {
       throw new import_js_format.Errorf(
         "Debugger hash must be a positive Number, but %v given.",
@@ -265,7 +271,7 @@ function createDebugger(namespaceOrOptions = void 0) {
     return createDebugger(stCopy);
   };
   debugFn.withOffset = function(offsetSize) {
-    const stCopy = JSON.parse(JSON.stringify(st));
+    const stCopy = JSON.parse(JSON.stringify(state));
     if (!offsetSize || typeof offsetSize !== "number" || offsetSize < 1) {
       throw new import_js_format.Errorf(
         "Debugger offset must be a positive Number, but %v given.",

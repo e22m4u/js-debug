@@ -131,12 +131,18 @@ export function createDebugger(namespaceOrOptions = undefined) {
   }
   // формирование состояния отладчика
   // для хранения текущих настроек
-  const st = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
-  st.nsArr = Array.isArray(st.nsArr) ? st.nsArr : [];
-  st.pattern = typeof st.pattern === 'string' ? st.pattern : '';
-  st.hash = typeof st.hash === 'string' ? st.hash : '';
-  st.offsetSize = typeof st.offsetSize === 'number' ? st.offsetSize : 0;
-  st.offsetStep = typeof st.offsetStep === 'string' ? st.offsetStep : '   ';
+  const state = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
+  state.nsArr = Array.isArray(state.nsArr) ? state.nsArr : [];
+  state.pattern = typeof state.pattern === 'string' ? state.pattern : '';
+  state.hash = typeof state.hash === 'string' ? state.hash : '';
+  state.offsetSize =
+    typeof state.offsetSize === 'number' ? state.offsetSize : 0;
+  state.offsetStep =
+    typeof state.offsetStep === 'string' ? state.offsetStep : '   ';
+  state.delimiter =
+    state.delimiter && typeof state.delimiter === 'string'
+      ? state.delimiter
+      : ':';
   // если переменная окружения содержит пространство
   // имен, то значение переменной добавляется
   // в общий список
@@ -145,15 +151,16 @@ export function createDebugger(namespaceOrOptions = undefined) {
     process.env &&
     process.env['DEBUGGER_NAMESPACE']
   ) {
-    st.nsArr.push(process.env.DEBUGGER_NAMESPACE);
+    state.nsArr.push(process.env.DEBUGGER_NAMESPACE);
   }
   // если первый аргумент содержит значение,
   // то оно используется как пространство имен
-  if (typeof namespaceOrOptions === 'string') st.nsArr.push(namespaceOrOptions);
+  if (typeof namespaceOrOptions === 'string')
+    state.nsArr.push(namespaceOrOptions);
   // если переменная окружения DEBUG содержит
   // значение, то оно используется как шаблон
   if (typeof process !== 'undefined' && process.env && process.env['DEBUG']) {
-    st.pattern = process.env['DEBUG'];
+    state.pattern = process.env['DEBUG'];
   }
   // если локальное хранилище браузера содержит
   // значение по ключу "debug", то оно используется
@@ -162,14 +169,14 @@ export function createDebugger(namespaceOrOptions = undefined) {
     typeof localStorage !== 'undefined' &&
     typeof localStorage.getItem('debug') === 'string'
   ) {
-    st.pattern = localStorage.getItem('debug');
+    state.pattern = localStorage.getItem('debug');
   }
   // формирование функции для проверки
   // активности текущего отладчика
   const isDebuggerEnabled = () => {
-    const nsStr = st.nsArr.join(':');
-    const patterns = st.pattern.split(/[\s,]+/).filter(p => p.length > 0);
-    if (patterns.length === 0 && st.pattern !== '*') return false;
+    const nsStr = state.nsArr.join(state.delimiter);
+    const patterns = state.pattern.split(/[\s,]+/).filter(p => p.length > 0);
+    if (patterns.length === 0 && state.pattern !== '*') return false;
     for (const singlePattern of patterns) {
       if (matchPattern(singlePattern, nsStr)) return true;
     }
@@ -178,15 +185,19 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // формирование префикса
   // для сообщений отладки
   const getPrefix = () => {
-    const tokens = [...st.nsArr, st.hash].filter(Boolean);
+    let tokens = [];
+    [...state.nsArr, state.hash].filter(Boolean).forEach(token => {
+      const extractedTokens = token.split(state.delimiter).filter(Boolean);
+      tokens = [...tokens, ...extractedTokens];
+    });
     let res = tokens.reduce((acc, token, index) => {
       const isLast = tokens.length - 1 === index;
       const tokenColor = pickColorCode(token);
       acc += wrapStringByColorCode(token, tokenColor);
-      if (!isLast) acc += ':';
+      if (!isLast) acc += state.delimiter;
       return acc;
     }, '');
-    if (st.offsetSize > 0) res += st.offsetStep.repeat(st.offsetSize);
+    if (state.offsetSize > 0) res += state.offsetStep.repeat(state.offsetSize);
     return res;
   };
   // формирование функции вывода
@@ -208,7 +219,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // создание новой функции логирования
   // с дополнительным пространством имен
   debugFn.withNs = function (namespace, ...args) {
-    const stCopy = JSON.parse(JSON.stringify(st));
+    const stCopy = JSON.parse(JSON.stringify(state));
     [namespace, ...args].forEach(ns => {
       if (!ns || typeof ns !== 'string')
         throw new Errorf(
@@ -222,7 +233,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // создание новой функции логирования
   // со статическим хэшем
   debugFn.withHash = function (hashLength = 4) {
-    const stCopy = JSON.parse(JSON.stringify(st));
+    const stCopy = JSON.parse(JSON.stringify(state));
     if (!hashLength || typeof hashLength !== 'number' || hashLength < 1) {
       throw new Errorf(
         'Debugger hash must be a positive Number, but %v given.',
@@ -235,7 +246,7 @@ export function createDebugger(namespaceOrOptions = undefined) {
   // создание новой функции логирования
   // со смещением сообщений отладки
   debugFn.withOffset = function (offsetSize) {
-    const stCopy = JSON.parse(JSON.stringify(st));
+    const stCopy = JSON.parse(JSON.stringify(state));
     if (!offsetSize || typeof offsetSize !== 'number' || offsetSize < 1) {
       throw new Errorf(
         'Debugger offset must be a positive Number, but %v given.',
