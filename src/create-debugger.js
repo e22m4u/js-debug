@@ -135,7 +135,8 @@ export function createDebugger(
   }
   // формирование состояния отладчика
   // для хранения текущих настроек
-  const state = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
+  const withCustomState = isNonArrayObject(namespaceOrOptions);
+  const state = withCustomState ? namespaceOrOptions : {};
   state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === 'string' ? state.pattern : '';
   state.hash = typeof state.hash === 'string' ? state.hash : '';
@@ -147,20 +148,25 @@ export function createDebugger(
     state.delimiter && typeof state.delimiter === 'string'
       ? state.delimiter
       : ':';
-  // если переменная окружения содержит пространство
-  // имен, то значение переменной добавляется
-  // в общий список
-  if (
-    typeof process !== 'undefined' &&
-    process.env &&
-    process.env['DEBUGGER_NAMESPACE']
-  ) {
-    state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
+  // если первым аргументом не является объект состояния,
+  // то дополнительно проверяется наличие сегмента пространства
+  // имен в переменной окружения, и сегмент из первого аргумента
+  if (!withCustomState) {
+    // если переменная окружения содержит пространство
+    // имен, то значение переменной добавляется
+    // в общий список
+    if (
+      typeof process !== 'undefined' &&
+      process.env &&
+      process.env['DEBUGGER_NAMESPACE']
+    ) {
+      state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
+    }
+    // если первый аргумент содержит значение,
+    // то оно используется как пространство имен
+    if (typeof namespaceOrOptions === 'string')
+      state.nsSegments.push(namespaceOrOptions);
   }
-  // если первый аргумент содержит значение,
-  // то оно используется как пространство имен
-  if (typeof namespaceOrOptions === 'string')
-    state.nsSegments.push(namespaceOrOptions);
   // проверка типа дополнительных сегментов пространства
   // имен, и добавление их в общий набор сегментов
   namespaceSegments.forEach(segment => {
@@ -233,42 +239,42 @@ export function createDebugger(
   // создание новой функции логирования
   // с дополнительным пространством имен
   debugFn.withNs = function (namespace, ...args) {
-    const stCopy = JSON.parse(JSON.stringify(state));
+    const stateCopy = JSON.parse(JSON.stringify(state));
     [namespace, ...args].forEach(ns => {
       if (!ns || typeof ns !== 'string')
         throw new Errorf(
           'Debugger namespace must be a non-empty String, but %v given.',
           ns,
         );
-      stCopy.nsSegments.push(ns);
+      stateCopy.nsSegments.push(ns);
     });
-    return createDebugger(stCopy);
+    return createDebugger(stateCopy);
   };
   // создание новой функции логирования
   // со статическим хэшем
   debugFn.withHash = function (hashLength = 4) {
-    const stCopy = JSON.parse(JSON.stringify(state));
+    const stateCopy = JSON.parse(JSON.stringify(state));
     if (!hashLength || typeof hashLength !== 'number' || hashLength < 1) {
       throw new Errorf(
         'Debugger hash must be a positive Number, but %v given.',
         hashLength,
       );
     }
-    stCopy.hash = generateRandomHex(hashLength);
-    return createDebugger(stCopy);
+    stateCopy.hash = generateRandomHex(hashLength);
+    return createDebugger(stateCopy);
   };
   // создание новой функции логирования
   // со смещением сообщений отладки
   debugFn.withOffset = function (offsetSize) {
-    const stCopy = JSON.parse(JSON.stringify(state));
+    const stateCopy = JSON.parse(JSON.stringify(state));
     if (!offsetSize || typeof offsetSize !== 'number' || offsetSize < 1) {
       throw new Errorf(
         'Debugger offset must be a positive Number, but %v given.',
         offsetSize,
       );
     }
-    stCopy.offsetSize = offsetSize;
-    return createDebugger(stCopy);
+    stateCopy.offsetSize = offsetSize;
+    return createDebugger(stateCopy);
   };
   return debugFn;
 }

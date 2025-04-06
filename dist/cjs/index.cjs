@@ -190,18 +190,21 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
       namespaceOrOptions
     );
   }
-  const state = isNonArrayObject(namespaceOrOptions) ? namespaceOrOptions : {};
+  const withCustomState = isNonArrayObject(namespaceOrOptions);
+  const state = withCustomState ? namespaceOrOptions : {};
   state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === "string" ? state.pattern : "";
   state.hash = typeof state.hash === "string" ? state.hash : "";
   state.offsetSize = typeof state.offsetSize === "number" ? state.offsetSize : 0;
   state.offsetStep = typeof state.offsetStep === "string" ? state.offsetStep : "   ";
   state.delimiter = state.delimiter && typeof state.delimiter === "string" ? state.delimiter : ":";
-  if (typeof process !== "undefined" && process.env && process.env["DEBUGGER_NAMESPACE"]) {
-    state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
+  if (!withCustomState) {
+    if (typeof process !== "undefined" && process.env && process.env["DEBUGGER_NAMESPACE"]) {
+      state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
+    }
+    if (typeof namespaceOrOptions === "string")
+      state.nsSegments.push(namespaceOrOptions);
   }
-  if (typeof namespaceOrOptions === "string")
-    state.nsSegments.push(namespaceOrOptions);
   namespaceSegments.forEach((segment) => {
     if (!segment || typeof segment !== "string")
       throw new import_js_format.Errorf(
@@ -256,38 +259,38 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   }
   __name(debugFn, "debugFn");
   debugFn.withNs = function(namespace, ...args) {
-    const stCopy = JSON.parse(JSON.stringify(state));
+    const stateCopy = JSON.parse(JSON.stringify(state));
     [namespace, ...args].forEach((ns) => {
       if (!ns || typeof ns !== "string")
         throw new import_js_format.Errorf(
           "Debugger namespace must be a non-empty String, but %v given.",
           ns
         );
-      stCopy.nsSegments.push(ns);
+      stateCopy.nsSegments.push(ns);
     });
-    return createDebugger(stCopy);
+    return createDebugger(stateCopy);
   };
   debugFn.withHash = function(hashLength = 4) {
-    const stCopy = JSON.parse(JSON.stringify(state));
+    const stateCopy = JSON.parse(JSON.stringify(state));
     if (!hashLength || typeof hashLength !== "number" || hashLength < 1) {
       throw new import_js_format.Errorf(
         "Debugger hash must be a positive Number, but %v given.",
         hashLength
       );
     }
-    stCopy.hash = generateRandomHex(hashLength);
-    return createDebugger(stCopy);
+    stateCopy.hash = generateRandomHex(hashLength);
+    return createDebugger(stateCopy);
   };
   debugFn.withOffset = function(offsetSize) {
-    const stCopy = JSON.parse(JSON.stringify(state));
+    const stateCopy = JSON.parse(JSON.stringify(state));
     if (!offsetSize || typeof offsetSize !== "number" || offsetSize < 1) {
       throw new import_js_format.Errorf(
         "Debugger offset must be a positive Number, but %v given.",
         offsetSize
       );
     }
-    stCopy.offsetSize = offsetSize;
-    return createDebugger(stCopy);
+    stateCopy.offsetSize = offsetSize;
+    return createDebugger(stateCopy);
   };
   return debugFn;
 }

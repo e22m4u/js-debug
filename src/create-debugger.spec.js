@@ -109,8 +109,6 @@ describe('createDebugger', function () {
       const debug = createDebugger('obj');
       const data = {a: 1, b: {c: 'deep'}};
       debug(data);
-      // ожидаем, что inspect будет вызван и его результат
-      // будет выведен построчно
       const expectedInspect = inspect(data, {
         colors: true,
         depth: null,
@@ -119,13 +117,9 @@ describe('createDebugger', function () {
       const expectedLines = expectedInspect.split('\n');
       expect(consoleLogSpy.callCount).to.equal(expectedLines.length);
       expectedLines.forEach((line, index) => {
-        // проверяем каждую строку с префиксом
-        // замечание: точное сравнение с inspect может быть хрупким из-за версий node/util
-        // здесь мы проверяем, что префикс есть и остальная часть строки соответствует inspect
         expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.contain(
           'obj ',
         );
-        // ожидаем, что строка вывода содержит соответствующую строку из inspect (без цвета)
         expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.have.string(
           stripAnsi(line),
         );
@@ -144,14 +138,11 @@ describe('createDebugger', function () {
         compact: false,
       });
       const expectedLines = expectedInspect.split('\n');
-      // 1 для описания + строки объекта
       const totalExpectedCalls = 1 + expectedLines.length;
       expect(consoleLogSpy.callCount).to.equal(totalExpectedCalls);
-      // первая строка - описание
       expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
         `objdesc ${description}`,
       );
-      // последующие строки - объект
       expectedLines.forEach((line, index) => {
         const callIndex = index + 1;
         expect(stripAnsi(consoleLogSpy.getCall(callIndex).args[0])).to.contain(
@@ -165,6 +156,7 @@ describe('createDebugger', function () {
   });
 
   describe('namespaces', function () {
+    // --- 1. Базовое создание (createDebugger) ---
     it('should use namespace provided in createDebugger', function () {
       process.env.DEBUG = 'app';
       const debug = createDebugger('app');
@@ -194,11 +186,10 @@ describe('createDebugger', function () {
       );
     });
 
+    // --- 2. Влияние DEBUGGER_NAMESPACE при создании ---
     it('should use namespace from DEBUGGER_NAMESPACE env variable', function () {
       process.env.DEBUGGER_NAMESPACE = 'base';
-      // должен быть включен для вывода
       process.env.DEBUG = 'base';
-      // без явного namespace
       const debug = createDebugger();
       debug('message');
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
@@ -227,6 +218,7 @@ describe('createDebugger', function () {
       );
     });
 
+    // --- 3. Модификация (withNs) ---
     it('should extend namespace with withNs()', function () {
       process.env.DEBUG = 'app:service';
       const debugApp = createDebugger('app');
@@ -234,17 +226,6 @@ describe('createDebugger', function () {
       debugService('message');
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
         'app:service message',
-      );
-    });
-
-    it('should extend namespace with withNs() after creating with multiple segments', function () {
-      process.env.DEBUG = 'app:svc:mod';
-      const debugBase = createDebugger('app', 'svc');
-      const debugMod = debugBase.withNs('mod');
-      debugMod('multi create then withNs');
-      expect(consoleLogSpy.calledOnce).to.be.true;
-      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
-        'app:svc:mod multi create then withNs',
       );
     });
 
@@ -267,6 +248,55 @@ describe('createDebugger', function () {
       );
     });
 
+    it('should extend namespace with withNs() after creating with multiple segments', function () {
+      process.env.DEBUG = 'app:svc:mod';
+      const debugBase = createDebugger('app', 'svc');
+      const debugMod = debugBase.withNs('mod');
+      debugMod('multi create then withNs');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'app:svc:mod multi create then withNs',
+      );
+    });
+
+    // --- 4. Взаимодействие DEBUGGER_NAMESPACE с модификаторами (Тесты на фикс дублирования) ---
+    it('should NOT duplicate DEBUGGER_NAMESPACE when using withNs', function () {
+      process.env.DEBUGGER_NAMESPACE = 'envNs';
+      process.env.DEBUG = 'envNs:service';
+      const debugBase = createDebugger();
+      const debugService = debugBase.withNs('service');
+      debugService('message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'envNs:service message',
+      );
+    });
+
+    it('should correctly combine DEBUGGER_NAMESPACE, initial segments, and withNs without duplicates', function () {
+      process.env.DEBUGGER_NAMESPACE = 'envNs';
+      process.env.DEBUG = 'envNs:init1:init2:added';
+      const debugBase = createDebugger('init1', 'init2');
+      const debugAdded = debugBase.withNs('added');
+      debugAdded('combined message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'envNs:init1:init2:added combined message',
+      );
+    });
+
+    it('should work correctly with withNs when DEBUGGER_NAMESPACE is NOT set', function () {
+      expect(process.env.DEBUGGER_NAMESPACE).to.be.undefined;
+      process.env.DEBUG = 'app:service';
+      const debugBase = createDebugger('app');
+      const debugService = debugBase.withNs('service');
+      debugService('message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'app:service message',
+      );
+    });
+
+    // --- 5. Обработка ошибок ---
     it('should throw error if createDebugger is called with invalid subsequent segment type', function () {
       expect(() => createDebugger('app', 'valid', 123)).to.throw(
         /Namespace segment must be a non-empty String/,
@@ -279,18 +309,24 @@ describe('createDebugger', function () {
       );
       expect(() => createDebugger('app', '')).to.throw(
         /Namespace segment must be a non-empty String/,
-      ); // Также проверяем пустой второй сегмент
+      );
     });
 
     it('should throw error if withNs is called with non-string', function () {
       const debug = createDebugger('app');
-      expect(() => debug.withNs(123)).to.throw(/must be a non-empty String/);
-      expect(() => debug.withNs(null)).to.throw(/must be a non-empty String/);
-      expect(() => debug.withNs('')).to.throw(/must be a non-empty String/);
+      expect(() => debug.withNs(123)).to.throw(
+        /Debugger namespace must be a non-empty String/,
+      );
+      expect(() => debug.withNs(null)).to.throw(
+        /Debugger namespace must be a non-empty String/,
+      );
+      expect(() => debug.withNs('')).to.throw(
+        /Debugger namespace must be a non-empty String/,
+      );
     });
   });
 
-  describe('DEBUG / localStorage', function () {
+  describe('environment', function () {
     it('should enable debugger based on exact match in DEBUG', function () {
       process.env.DEBUG = 'app:service';
       const debug = createDebugger('app:service');
@@ -341,7 +377,6 @@ describe('createDebugger', function () {
       debugAppSvc('1');
       debugAppDb('2');
       debugSvcAuth('3');
-      // не должен выводиться
       debugSvcOther('4');
       debugOther('5');
       expect(consoleLogSpy.calledThrice).to.be.true;
@@ -357,14 +392,12 @@ describe('createDebugger', function () {
     });
 
     it('should handle multiple patterns in DEBUG (space)', function () {
-      // используем пробел
       process.env.DEBUG = 'app:* svc:auth';
       const debugAppSvc = createDebugger('app:service');
       const debugSvcAuth = createDebugger('svc:auth');
       const debugOther = createDebugger('other');
       debugAppSvc('1');
       debugSvcAuth('3');
-      // не должен выводиться
       debugOther('5');
       expect(consoleLogSpy.calledTwice).to.be.true;
       expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.contain(
@@ -376,7 +409,6 @@ describe('createDebugger', function () {
     });
 
     it('should use localStorage pattern if DEBUG env is not set', function () {
-      // process.env.debug не установлен (по умолчанию в beforeEach)
       global.localStorage.setItem('debug', 'local:*');
       const debugLocal = createDebugger('local:test');
       const debugOther = createDebugger('other:test');
@@ -394,7 +426,6 @@ describe('createDebugger', function () {
       const debugEnv = createDebugger('env:test');
       const debugLocal = createDebugger('local:test');
       debugEnv('message env');
-      // не должен выводиться
       debugLocal('message local');
       expect(consoleLogSpy.calledOnce).to.be.true;
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
@@ -406,11 +437,9 @@ describe('createDebugger', function () {
   describe('hashing', function () {
     it('should add a hash prefix with withHash()', function () {
       process.env.DEBUG = 'hash';
-      // default length 4
       const debug = createDebugger('hash').withHash();
       debug('message');
       expect(consoleLogSpy.calledOnce).to.be.true;
-      // проверяем формат: namespace:hash message
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.match(
         /^hash:[a-f0-9]{4} message$/,
       );
@@ -444,7 +473,6 @@ describe('createDebugger', function () {
       const hash2 = stripAnsi(consoleLogSpy.getCall(1).args[0]).match(
         /hash:([a-f0-9]{4})/,
       )[1];
-      // вероятность коллизии крайне мала для 4 символов
       expect(hash1).to.not.equal(hash2);
     });
 
@@ -464,19 +492,29 @@ describe('createDebugger', function () {
       expect(() => debug.withHash(null)).to.throw(/must be a positive Number/);
       expect(() => debug.withHash('abc')).to.throw(/must be a positive Number/);
     });
+
+    it('should NOT duplicate DEBUGGER_NAMESPACE when using withHash', function () {
+      process.env.DEBUGGER_NAMESPACE = 'envNs';
+      process.env.DEBUG = 'envNs';
+      const debugBase = createDebugger();
+      const debugHashed = debugBase.withHash();
+      debugHashed('message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.match(
+        /^envNs:[a-f0-9]{4} message$/,
+      );
+    });
   });
 
   describe('offset', function () {
-    // предупреждение: ожидания в этом тесте (`offset    message1`) могут не соответствовать
-    // предполагаемой логике (2 пробела на уровень), проверьте реализацию `getPrefix` и `offsetStep`.
     it('should add offset spaces with withOffset()', function () {
       process.env.DEBUG = 'offset';
+      // предполагая, что offsetStep = '   '
       const debug1 = createDebugger('offset').withOffset(1);
       const debug2 = createDebugger('offset').withOffset(2);
       debug1('message1');
       debug2('message2');
       expect(consoleLogSpy.calledTwice).to.be.true;
-      // проверяем отступы (этот комментарий может быть неточен, см. предупреждение выше)
       expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
         'offset    message1',
       );
@@ -490,20 +528,17 @@ describe('createDebugger', function () {
       const debug = createDebugger('offsetobj').withOffset(1);
       const data = {a: 1, b: 2};
       debug(data);
-
       const expectedInspect = inspect(data, {
         colors: true,
         depth: null,
         compact: false,
       });
       const expectedLines = expectedInspect.split('\n');
-
       expect(consoleLogSpy.callCount).to.equal(expectedLines.length);
       expectedLines.forEach((line, index) => {
-        // ожидаем префикс + отступ + текст строки
-        // предупреждение: \s{2} здесь может не соответствовать ожиданиям в других тестах смещения.
+        // предполагая, что offsetStep = '   '
         expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.match(
-          /^offsetobj\s{2}/,
+          /^offsetobj\s{4}/,
         );
         expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.contain(
           stripAnsi(line),
@@ -522,6 +557,19 @@ describe('createDebugger', function () {
         /must be a positive Number/,
       );
     });
+
+    it('should NOT duplicate DEBUGGER_NAMESPACE when using withOffset', function () {
+      process.env.DEBUGGER_NAMESPACE = 'envNs';
+      process.env.DEBUG = 'envNs';
+      const debugBase = createDebugger();
+      const debugOffset = debugBase.withOffset(1);
+      debugOffset('message');
+      expect(consoleLogSpy.calledOnce).to.be.true;
+      // предполагая, что offsetStep = '   '
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
+        'envNs    message',
+      );
+    });
   });
 
   describe('combine', function () {
@@ -532,10 +580,8 @@ describe('createDebugger', function () {
         .withHash(5)
         .withOffset(1);
       debug('combined message');
-
       expect(consoleLogSpy.calledOnce).to.be.true;
-      // ожидаемый формат: namespace:hash<offset>message
-      // предупреждение: \s{4} здесь может не соответствовать ожиданиям в других тестах смещения.
+      // предполагая, что offsetStep = '   '
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.match(
         /^app:svc:[a-f0-9]{5}\s{4}combined message$/,
       );
@@ -547,11 +593,9 @@ describe('createDebugger', function () {
         .withNs('svc')
         .withHash(3)
         .withOffset(1);
-
       const data = {id: 123};
       const description = 'Data:';
       debug(data, description);
-
       const expectedInspect = inspect(data, {
         colors: true,
         depth: null,
@@ -559,23 +603,16 @@ describe('createDebugger', function () {
       });
       const expectedLines = expectedInspect.split('\n');
       const totalExpectedCalls = 1 + expectedLines.length;
-
       expect(consoleLogSpy.callCount).to.equal(totalExpectedCalls);
-
-      // проверяем строку описания
-      // предупреждение: \s{4} здесь может не соответствовать ожиданиям в других тестах смещения.
+      // предполагая, что offsetStep = '   '
       expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
         /^app:svc:[a-f0-9]{3}\s{4}Data:$/,
       );
-
-      // проверяем строки объекта
       expectedLines.forEach((line, index) => {
         const callIndex = index + 1;
         const logLine = stripAnsi(consoleLogSpy.getCall(callIndex).args[0]);
-        // префикс, хэш, отступ
-        // предупреждение: \s{2} здесь может не соответствовать ожиданиям в других тестах смещения.
-        expect(logLine).to.match(/^app:svc:[a-f0-9]{3}\s{2}/);
-        // содержимое строки inspect
+        // предполагая, что offsetStep = '   '
+        expect(logLine).to.match(/^app:svc:[a-f0-9]{3}\s{4}/);
         expect(logLine).to.contain(stripAnsi(line));
       });
     });
@@ -589,12 +626,9 @@ describe('createDebugger', function () {
       expect(() => createDebugger(true)).to.throw(
         /must be a String or an Object/,
       );
-      // массив - не простой объект
       expect(() => createDebugger([])).to.throw(
         /must be a String or an Object/,
       );
-      // null должен вызывать ошибку (проверяется отдельно или убедитесь, что isNonArrayObject(null) === false)
-      // expect(() => createDebugger(null)).to.throw(/must be a String or an Object/);
     });
   });
 });
