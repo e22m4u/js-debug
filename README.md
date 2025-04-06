@@ -22,7 +22,7 @@ import {createDebugger} from '@e22m4u/js-debug';
 const {createDebugger} = require('@e22m4u/js-debug');
 ```
 
-## Примеры
+## Использование
 
 Интерполяция строк (см. спецификаторы [@e22m4u/js-format](https://www.npmjs.com/package/@e22m4u/js-format)).
 
@@ -192,6 +192,80 @@ debugWo1(contact, 'Participant contacts found:');
 // myApp:myService:o3pk       home: '+1-555-987-6543'
 // myApp:myService:o3pk     },
 // myApp:myService:o3pk   }
+```
+
+## Управление выводом
+
+По умолчанию вызовы функции `debug` ничего не выводят. Чтобы увидеть отладочные
+сообщения, необходимо указать, какие именно пространства имен вас интересуют.
+Это делается с помощью специального паттерна (шаблона). Механизм включения
+зависит от среды выполнения.
+
+### Node.js: Переменная окружения `DEBUG`
+
+В среде Node.js используется переменная окружения DEBUG. Вы можете установить
+её при запуске вашего скрипта.
+
+```bash
+# включить конкретное пространство имен
+DEBUG=myApp node your_script.js
+
+# включить все пространства имен, начинающиеся с 'myApp:'
+DEBUG=myApp:* node your_script.js
+
+# включить несколько пространств имен через запятую
+DEBUG=myApp:service,lib:utils node your_script.js
+# если используете пробелы, нужны кавычки
+DEBUG="myApp:service lib:utils" node your_script.js
+
+# включить ВСЕ пространства имен
+DEBUG=* node your_script.js
+```
+
+### Браузер: localStorage.debug
+
+В веб-браузерах для управления выводом используется ключ debug в localStorage.
+Вы можете установить его значение через консоль разработчика.
+
+```js
+// включить конкретное пространство имен
+localStorage.debug = 'myApp';
+
+// включить все пространства имен, начинающиеся с 'myApp:'
+localStorage.debug = 'myApp:*';
+
+// включить несколько (через запятую или пробел)
+localStorage.debug = 'myApp:service,lib:utils';
+// или
+localStorage.debug = 'myApp:service lib:utils';
+
+// включить ВСЕ
+localStorage.debug = '*';
+
+// отключить вывод
+localStorage.removeItem('debug');
+// или
+localStorage.debug = '';
+```
+
+*i. После изменения `localStorage.debug` обычно требуется перезагрузить
+страницу, чтобы изменения вступили в силу.*
+
+### Синтаксис паттернов
+
+- Точное совпадение (например, `myApp:myService`);
+- Wildcard (\*): `myApp*` соответствует `myApp`, `myApp:myService` и т.д.;
+- Несколько паттернов можно указать разделив из запятой или пробелом;
+- Включить всё: `*` включает вывод для всех пространств имен;
+
+Примеры шаблонов в окружении Node.js:
+
+```bash
+node main.js # ничего не выведет
+DEBUG=* node main.js # выведет все сообщения
+DEBUG=app node main.js # только пространство имен app
+DEBUG=app:* node main.js # пространства имен с префиксом app:
+DEBUG=app:worker,legacy node main.js # только app:worker и legacy
 ```
 
 ## Тесты
