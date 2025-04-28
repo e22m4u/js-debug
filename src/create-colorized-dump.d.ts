@@ -3,4 +3,4 @@
  *
  * @param value
  */
-export declare function dump(value: unknown): void;
+export declare function createColorizedDump(value: unknown): void;
