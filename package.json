@@ -1,6 +1,6 @@
 {
   "name": "@e22m4u/js-debug",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Утилита вывода сообщений отладки для JavaScript",
   "author": "e22m4u <e22m4u@yandex.ru>",
   "license": "MIT",
