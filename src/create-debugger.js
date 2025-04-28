@@ -18,6 +18,13 @@ const AVAILABLE_COLORS = [
 ];
 
 /**
+ * Стандартное количество пробелов в одном шаге смещения.
+ *
+ * @type {number}
+ */
+export const DEFAULT_OFFSET_STEP_SPACES = 2;
+
+/**
  * Подбор цвета для строки.
  *
  * @param {string} input
@@ -101,7 +108,7 @@ function matchPattern(pattern, input) {
  * Create debugger.
  *
  * @param {string} namespaceOrOptions
- * @param {string[]} namespaceSegments
+ * @param {string} namespaceSegments
  * @returns {Function}
  */
 export function createDebugger(
@@ -131,7 +138,9 @@ export function createDebugger(
   state.offsetSize =
     typeof state.offsetSize === 'number' ? state.offsetSize : 0;
   state.offsetStep =
-    typeof state.offsetStep === 'string' ? state.offsetStep : '   ';
+    typeof state.offsetStep !== 'string'
+      ? ' '.repeat(DEFAULT_OFFSET_STEP_SPACES)
+      : state.offsetStep;
   state.delimiter =
     state.delimiter && typeof state.delimiter === 'string'
       ? state.delimiter
@@ -223,9 +232,23 @@ export function createDebugger(
     }
     const multiString = createColorizedDump(messageOrData);
     const rows = multiString.split('\n');
-    [...args, ...rows].forEach(message => {
-      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-    });
+    // если дамп объекта имеет заголовочные сообщения передаваемые
+    // в аргументах данной функции, то после вывода этих сообщений
+    // к дампу добавляется один шаг смещения, чтобы визуально связать
+    // дамп с заголовочными сообщениями
+    if (args.length) {
+      args.forEach(message => {
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
+      rows.forEach(message => {
+        message = `${state.offsetStep}${message}`;
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
+    } else {
+      rows.forEach(message => {
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
+    }
   }
   // создание новой функции логирования
   // с дополнительным пространством имен

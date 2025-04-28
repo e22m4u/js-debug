@@ -20,6 +20,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.js
 var index_exports = {};
 __export(index_exports, {
+  DEFAULT_OFFSET_STEP_SPACES: () => DEFAULT_OFFSET_STEP_SPACES,
   INSPECT_OPTIONS: () => INSPECT_OPTIONS,
   createColorizedDump: () => createColorizedDump,
   createDebugger: () => createDebugger
@@ -146,6 +147,7 @@ var AVAILABLE_COLORS = [
   220,
   221
 ];
+var DEFAULT_OFFSET_STEP_SPACES = 2;
 function pickColorCode(input) {
   if (typeof input !== "string")
     throw new import_js_format.Errorf(
@@ -204,7 +206,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   state.pattern = typeof state.pattern === "string" ? state.pattern : "";
   state.hash = typeof state.hash === "string" ? state.hash : "";
   state.offsetSize = typeof state.offsetSize === "number" ? state.offsetSize : 0;
-  state.offsetStep = typeof state.offsetStep === "string" ? state.offsetStep : "   ";
+  state.offsetStep = typeof state.offsetStep !== "string" ? " ".repeat(DEFAULT_OFFSET_STEP_SPACES) : state.offsetStep;
   state.delimiter = state.delimiter && typeof state.delimiter === "string" ? state.delimiter : ":";
   if (!withCustomState) {
     if (typeof process !== "undefined" && process.env && process.env["DEBUGGER_NAMESPACE"]) {
@@ -264,9 +266,19 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
     }
     const multiString = createColorizedDump(messageOrData);
     const rows = multiString.split("\n");
-    [...args, ...rows].forEach((message) => {
-      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-    });
+    if (args.length) {
+      args.forEach((message) => {
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
+      rows.forEach((message) => {
+        message = `${state.offsetStep}${message}`;
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
+    } else {
+      rows.forEach((message) => {
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
+    }
   }
   __name(debugFn, "debugFn");
   debugFn.withNs = function(namespace, ...args) {
@@ -308,6 +320,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
 __name(createDebugger, "createDebugger");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  DEFAULT_OFFSET_STEP_SPACES,
   INSPECT_OPTIONS,
   createColorizedDump,
   createDebugger

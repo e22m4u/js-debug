@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import {expect} from 'chai';
 import {inspect} from 'util';
-import {createDebugger} from './create-debugger.js';
+import {createDebugger, DEFAULT_OFFSET_STEP_SPACES} from './create-debugger.js';
 
 // вспомогательная функция для удаления ANSI escape-кодов (цветов)
 // eslint-disable-next-line no-control-regex
@@ -308,6 +308,41 @@ describe('createDebugger', function () {
       );
     });
 
+    it('should add extra offset to dump if it has heading messages', function () {
+      process.env.DEBUG = 'app:service';
+      const debug = createDebugger('app', 'service');
+      const dummyData = {foo: 'bar', baz: 'qux'};
+      debug(dummyData, 'Data:');
+      expect(consoleLogSpy.callCount).to.be.eq(5);
+      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.be.eq(
+        'app:service Data:',
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
+        new RegExp(
+          '^app:service\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}\\{',
+        ),
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.match(
+        new RegExp(
+          '^app:service\\s{' +
+            (DEFAULT_OFFSET_STEP_SPACES + 1) +
+            "}  foo: 'bar',",
+        ),
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(3).args[0])).to.match(
+        new RegExp(
+          '^app:service\\s{' +
+            (DEFAULT_OFFSET_STEP_SPACES + 1) +
+            "}  baz: 'qux'",
+        ),
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(4).args[0])).to.match(
+        new RegExp(
+          '^app:service\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}\\}',
+        ),
+      );
+    });
+
     it('should throw error if createDebugger is called with invalid subsequent segment type', function () {
       expect(() => createDebugger('app', 'valid', 123)).to.throw(
         /Namespace segment must be a non-empty String/,
@@ -526,11 +561,15 @@ describe('createDebugger', function () {
       debug1('message1');
       debug2('message2');
       expect(consoleLogSpy.calledTwice).to.be.true;
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
-        'offset    message1',
+      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+        new RegExp(
+          '^offset\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}message1$',
+        ),
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal(
-        'offset       message2',
+      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
+        new RegExp(
+          '^offset\\s{' + (DEFAULT_OFFSET_STEP_SPACES * 2 + 1) + '}message2$',
+        ),
       );
     });
 
@@ -549,7 +588,7 @@ describe('createDebugger', function () {
       expectedLines.forEach((line, index) => {
         // предполагая, что offsetStep = '   '
         expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.match(
-          /^offsetobj\s{4}/,
+          new RegExp('^offsetobj\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}'),
         );
         expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.contain(
           stripAnsi(line),
@@ -577,8 +616,31 @@ describe('createDebugger', function () {
       debugOffset('message');
       expect(consoleLogSpy.calledOnce).to.be.true;
       // предполагая, что offsetStep = '   '
-      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.equal(
-        'envNs    message',
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.match(
+        new RegExp(
+          '^envNs\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}message$',
+        ),
+      );
+    });
+
+    it('should add extra offset to dump if it has heading messages', function () {
+      process.env.DEBUG = '*';
+      const debug = createDebugger();
+      const dummyData = {foo: 'bar', baz: 'qux'};
+      debug(dummyData, 'Data:');
+      expect(consoleLogSpy.callCount).to.be.eq(5);
+      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.be.eq('Data:');
+      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
+        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + '}\\{'),
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.match(
+        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + "}  foo: 'bar',"),
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(3).args[0])).to.match(
+        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + "}  baz: 'qux'"),
+      );
+      expect(stripAnsi(consoleLogSpy.getCall(4).args[0])).to.match(
+        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + '}\\}'),
       );
     });
   });
@@ -594,7 +656,11 @@ describe('createDebugger', function () {
       expect(consoleLogSpy.calledOnce).to.be.true;
       // предполагая, что offsetStep = '   '
       expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.match(
-        /^app:svc:[a-f0-9]{5}\s{4}combined message$/,
+        new RegExp(
+          '^app:svc:[a-f0-9]{5}\\s{' +
+            (DEFAULT_OFFSET_STEP_SPACES + 1) +
+            '}combined message$',
+        ),
       );
     });
 
@@ -617,13 +683,21 @@ describe('createDebugger', function () {
       expect(consoleLogSpy.callCount).to.equal(totalExpectedCalls);
       // предполагая, что offsetStep = '   '
       expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
-        /^app:svc:[a-f0-9]{3}\s{4}Data:$/,
+        new RegExp(
+          '^app:svc:[a-f0-9]{3}\\s{' +
+            (DEFAULT_OFFSET_STEP_SPACES + 1) +
+            '}Data:$',
+        ),
       );
       expectedLines.forEach((line, index) => {
         const callIndex = index + 1;
         const logLine = stripAnsi(consoleLogSpy.getCall(callIndex).args[0]);
         // предполагая, что offsetStep = '   '
-        expect(logLine).to.match(/^app:svc:[a-f0-9]{3}\s{4}/);
+        expect(logLine).to.match(
+          new RegExp(
+            '^app:svc:[a-f0-9]{3}\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}',
+          ),
+        );
         expect(logLine).to.contain(stripAnsi(line));
       });
     });
