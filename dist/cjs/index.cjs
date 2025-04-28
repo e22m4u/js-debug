@@ -20,12 +20,13 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.js
 var index_exports = {};
 __export(index_exports, {
+  INSPECT_OPTIONS: () => INSPECT_OPTIONS,
+  createColorizedDump: () => createColorizedDump,
   createDebugger: () => createDebugger
 });
 module.exports = __toCommonJS(index_exports);
 
 // src/create-debugger.js
-var import_util = require("util");
 var import_js_format = require("@e22m4u/js-format");
 var import_js_format2 = require("@e22m4u/js-format");
 
@@ -52,6 +53,19 @@ function generateRandomHex(length = 4) {
   return result;
 }
 __name(generateRandomHex, "generateRandomHex");
+
+// src/create-colorized-dump.js
+var import_util = require("util");
+var INSPECT_OPTIONS = {
+  showHidden: false,
+  depth: null,
+  colors: true,
+  compact: false
+};
+function createColorizedDump(value) {
+  return (0, import_util.inspect)(value, INSPECT_OPTIONS);
+}
+__name(createColorizedDump, "createColorizedDump");
 
 // src/create-debugger.js
 var AVAILABLE_COLORS = [
@@ -132,12 +146,6 @@ var AVAILABLE_COLORS = [
   220,
   221
 ];
-var INSPECT_OPTIONS = {
-  showHidden: false,
-  depth: null,
-  colors: true,
-  compact: false
-};
 function pickColorCode(input) {
   if (typeof input !== "string")
     throw new import_js_format.Errorf(
@@ -251,7 +259,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
       prefix ? console.log(`${prefix} ${message}`) : console.log(message);
       return;
     }
-    const multiString = (0, import_util.inspect)(messageOrData, INSPECT_OPTIONS);
+    const multiString = createColorizedDump(messageOrData);
     const rows = multiString.split("\n");
     [...args, ...rows].forEach((message) => {
       prefix ? console.log(`${prefix} ${message}`) : console.log(message);
@@ -297,5 +305,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
 __name(createDebugger, "createDebugger");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  INSPECT_OPTIONS,
+  createColorizedDump,
   createDebugger
 });

@@ -1,8 +1,8 @@
-import {inspect} from 'util';
 import {Errorf} from '@e22m4u/js-format';
 import {format} from '@e22m4u/js-format';
 import {isNonArrayObject} from './utils/index.js';
 import {generateRandomHex} from './utils/index.js';
+import {createColorizedDump} from './create-colorized-dump.js';
 
 /**
  * Доступные цвета.
@@ -16,18 +16,6 @@ const AVAILABLE_COLORS = [
   172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204,
   205, 206, 207, 208, 209, 214, 215, 220, 221,
 ];
-
-/**
- * Опции утилиты inspect для дампа объектов.
- *
- * @type {object}
- */
-const INSPECT_OPTIONS = {
-  showHidden: false,
-  depth: null,
-  colors: true,
-  compact: false,
-};
 
 /**
  * Подбор цвета для строки.
@@ -230,7 +218,7 @@ export function createDebugger(
       prefix ? console.log(`${prefix} ${message}`) : console.log(message);
       return;
     }
-    const multiString = inspect(messageOrData, INSPECT_OPTIONS);
+    const multiString = createColorizedDump(messageOrData);
     const rows = multiString.split('\n');
     [...args, ...rows].forEach(message => {
       prefix ? console.log(`${prefix} ${message}`) : console.log(message);
