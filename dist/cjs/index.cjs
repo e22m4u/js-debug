@@ -255,8 +255,11 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
     if (!isDebuggerEnabled()) return;
     const prefix = getPrefix();
     if (typeof messageOrData === "string") {
-      const message = (0, import_js_format2.format)(messageOrData, ...args);
-      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      const multiString2 = (0, import_js_format2.format)(messageOrData, ...args);
+      const rows2 = multiString2.split("\n");
+      rows2.forEach((message) => {
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
       return;
     }
     const multiString = createColorizedDump(messageOrData);

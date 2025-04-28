@@ -214,8 +214,11 @@ export function createDebugger(
     if (!isDebuggerEnabled()) return;
     const prefix = getPrefix();
     if (typeof messageOrData === 'string') {
-      const message = format(messageOrData, ...args);
-      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      const multiString = format(messageOrData, ...args);
+      const rows = multiString.split('\n');
+      rows.forEach(message => {
+        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+      });
       return;
     }
     const multiString = createColorizedDump(messageOrData);

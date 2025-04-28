@@ -156,7 +156,6 @@ describe('createDebugger', function () {
   });
 
   describe('namespaces', function () {
-    // --- 1. Базовое создание (createDebugger) ---
     it('should use namespace provided in createDebugger', function () {
       process.env.DEBUG = 'app';
       const debug = createDebugger('app');
@@ -296,7 +295,19 @@ describe('createDebugger', function () {
       );
     });
 
-    // --- 5. Обработка ошибок ---
+    it('should add namespace prefix for each line if the given message is multiline', function () {
+      process.env.DEBUG = 'app:service';
+      const debug = createDebugger('app', 'service');
+      debug('firstLine\nsecondLine');
+      expect(consoleLogSpy.calledTwice).to.be.true;
+      expect(stripAnsi(consoleLogSpy.firstCall.args[0])).to.be.eq(
+        'app:service firstLine',
+      );
+      expect(stripAnsi(consoleLogSpy.secondCall.args[0])).to.be.eq(
+        'app:service secondLine',
+      );
+    });
+
     it('should throw error if createDebugger is called with invalid subsequent segment type', function () {
       expect(() => createDebugger('app', 'valid', 123)).to.throw(
         /Namespace segment must be a non-empty String/,
