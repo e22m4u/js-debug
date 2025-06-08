@@ -480,11 +480,11 @@ describe('createDebugger', function () {
       );
     });
 
-    it('should exclude namespace of DEBUGGER_NAMESPACE in withoutGlobalNs()', function () {
+    it('should exclude namespace of DEBUGGER_NAMESPACE in withoutEnvNs()', function () {
       process.env.DEBUG = '*';
       process.env.DEBUGGER_NAMESPACE = 'myApp';
       const debug1 = createDebugger();
-      const debug2 = debug1.withoutGlobalNs();
+      const debug2 = debug1.withoutEnvNs();
       debug1('message 1');
       expect(consoleLogSpy.callCount).to.equal(1);
       expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(

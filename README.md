@@ -125,7 +125,7 @@ import {createDebugger} from '@e22m4u/js-debug';
 process.env['DEBUGGER_NAMESPACE'] = 'myApp';
 
 const debug1 = createDebugger();
-const debug2 = debug1.withoutGlobalNs();
+const debug2 = debug1.withoutEnvNs();
 debug1('Hello world');
 debug2('Hello world');
 // myApp Hello world

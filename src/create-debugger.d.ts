@@ -50,12 +50,12 @@ export interface Debugger {
   withOffset(offsetSize: number): Debugger;
 
   /**
-   * Создает новый экземпляр отладчика без глобальных пространств имен
-   * (исключает пространство имен из переменной окружения DEBUGGER_NAMESPACE).
+   * Создает новый экземпляр отладчика без пространства имен
+   * из переменной окружения DEBUGGER_NAMESPACE.
    *
    * @returns Новый экземпляр Debugger.
    */
-  withoutGlobalNs(): Debugger;
+  withoutEnvNs(): Debugger;
 }
 
 /**

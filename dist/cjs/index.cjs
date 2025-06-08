@@ -202,7 +202,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   }
   const withCustomState = isNonArrayObject(namespaceOrOptions);
   const state = withCustomState ? namespaceOrOptions : {};
-  state.globalNsSegments = Array.isArray(state.globalNsSegments) ? state.globalNsSegments : [];
+  state.envNsSegments = Array.isArray(state.envNsSegments) ? state.envNsSegments : [];
   state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === "string" ? state.pattern : "";
   state.hash = typeof state.hash === "string" ? state.hash : "";
@@ -211,7 +211,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   state.delimiter = state.delimiter && typeof state.delimiter === "string" ? state.delimiter : ":";
   if (!withCustomState) {
     if (typeof process !== "undefined" && process.env && process.env["DEBUGGER_NAMESPACE"]) {
-      state.globalNsSegments.push(process.env.DEBUGGER_NAMESPACE);
+      state.envNsSegments.push(process.env.DEBUGGER_NAMESPACE);
     }
     if (typeof namespaceOrOptions === "string")
       state.nsSegments.push(namespaceOrOptions);
@@ -230,7 +230,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
     state.pattern = localStorage.getItem("debug");
   }
   const isDebuggerEnabled = /* @__PURE__ */ __name(() => {
-    const nsStr = [...state.globalNsSegments, ...state.nsSegments].join(
+    const nsStr = [...state.envNsSegments, ...state.nsSegments].join(
       state.delimiter
     );
     const patterns = state.pattern.split(/[\s,]+/).filter((p) => p.length > 0);
@@ -242,7 +242,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   }, "isDebuggerEnabled");
   const getPrefix = /* @__PURE__ */ __name(() => {
     let tokens = [];
-    [...state.globalNsSegments, ...state.nsSegments, state.hash].filter(Boolean).forEach((token) => {
+    [...state.envNsSegments, ...state.nsSegments, state.hash].filter(Boolean).forEach((token) => {
       const extractedTokens = token.split(state.delimiter).filter(Boolean);
       tokens = [...tokens, ...extractedTokens];
     });
@@ -318,9 +318,9 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
     stateCopy.offsetSize = offsetSize;
     return createDebugger(stateCopy);
   };
-  debugFn.withoutGlobalNs = function() {
+  debugFn.withoutEnvNs = function() {
     const stateCopy = JSON.parse(JSON.stringify(state));
-    stateCopy.globalNsSegments = [];
+    stateCopy.envNsSegments = [];
     return createDebugger(stateCopy);
   };
   return debugFn;
