@@ -117,7 +117,7 @@ debug('Hello world');
 // myApp Hello world
 ```
 
-Исключение пространства имен из переменной окружения `DEBUGGER_NAMESPACE`.
+Исключение переменной окружения `DEBUGGER_NAMESPACE` из пространства имен.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
