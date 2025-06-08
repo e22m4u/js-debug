@@ -132,6 +132,9 @@ export function createDebugger(
   // для хранения текущих настроек
   const withCustomState = isNonArrayObject(namespaceOrOptions);
   const state = withCustomState ? namespaceOrOptions : {};
+  state.globalNsSegments = Array.isArray(state.globalNsSegments)
+    ? state.globalNsSegments
+    : [];
   state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === 'string' ? state.pattern : '';
   state.hash = typeof state.hash === 'string' ? state.hash : '';
@@ -157,7 +160,7 @@ export function createDebugger(
       process.env &&
       process.env['DEBUGGER_NAMESPACE']
     ) {
-      state.nsSegments.push(process.env.DEBUGGER_NAMESPACE);
+      state.globalNsSegments.push(process.env.DEBUGGER_NAMESPACE);
     }
     // если первый аргумент содержит значение,
     // то оно используется как пространство имен
@@ -191,7 +194,9 @@ export function createDebugger(
   // формирование функции для проверки
   // активности текущего отладчика
   const isDebuggerEnabled = () => {
-    const nsStr = state.nsSegments.join(state.delimiter);
+    const nsStr = [...state.globalNsSegments, ...state.nsSegments].join(
+      state.delimiter,
+    );
     const patterns = state.pattern.split(/[\s,]+/).filter(p => p.length > 0);
     if (patterns.length === 0 && state.pattern !== '*') return false;
     for (const singlePattern of patterns) {
@@ -203,10 +208,12 @@ export function createDebugger(
   // для сообщений отладки
   const getPrefix = () => {
     let tokens = [];
-    [...state.nsSegments, state.hash].filter(Boolean).forEach(token => {
-      const extractedTokens = token.split(state.delimiter).filter(Boolean);
-      tokens = [...tokens, ...extractedTokens];
-    });
+    [...state.globalNsSegments, ...state.nsSegments, state.hash]
+      .filter(Boolean)
+      .forEach(token => {
+        const extractedTokens = token.split(state.delimiter).filter(Boolean);
+        tokens = [...tokens, ...extractedTokens];
+      });
     let res = tokens.reduce((acc, token, index) => {
       const isLast = tokens.length - 1 === index;
       const tokenColor = pickColorCode(token);
@@ -288,6 +295,13 @@ export function createDebugger(
       );
     }
     stateCopy.offsetSize = offsetSize;
+    return createDebugger(stateCopy);
+  };
+  // создание новой функции логирования
+  // без глобальных пространств имен
+  debugFn.withoutGlobalNs = function () {
+    const stateCopy = JSON.parse(JSON.stringify(state));
+    stateCopy.globalNsSegments = [];
     return createDebugger(stateCopy);
   };
   return debugFn;

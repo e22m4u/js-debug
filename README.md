@@ -105,7 +105,7 @@ debug3('Hello world');
 // myApp:myService Hello world
 ```
 
-Использование пространства имен из переменной окружения.
+Использование пространства имен из переменной окружения `DEBUGGER_NAMESPACE`.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -115,6 +115,21 @@ process.env['DEBUGGER_NAMESPACE'] = 'myApp';
 const debug = createDebugger();
 debug('Hello world');
 // myApp Hello world
+```
+
+Исключение пространства имен из переменной окружения `DEBUGGER_NAMESPACE`.
+
+```js
+import {createDebugger} from '@e22m4u/js-debug';
+
+process.env['DEBUGGER_NAMESPACE'] = 'myApp';
+
+const debug1 = createDebugger();
+const debug2 = debug1.withoutGlobalNs();
+debug1('Hello world');
+debug2('Hello world');
+// myApp Hello world
+// Hello world
 ```
 
 Расширение сегментов пространства имен.

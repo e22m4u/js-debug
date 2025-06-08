@@ -479,6 +479,21 @@ describe('createDebugger', function () {
         'env:test message env',
       );
     });
+
+    it('should exclude namespace of DEBUGGER_NAMESPACE in withoutGlobalNs()', function () {
+      process.env.DEBUG = '*';
+      process.env.DEBUGGER_NAMESPACE = 'myApp';
+      const debug1 = createDebugger();
+      const debug2 = debug1.withoutGlobalNs();
+      debug1('message 1');
+      expect(consoleLogSpy.callCount).to.equal(1);
+      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+        'myApp message 1',
+      );
+      debug2('message 2');
+      expect(consoleLogSpy.callCount).to.equal(2);
+      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal('message 2');
+    });
   });
 
   describe('hashing', function () {
