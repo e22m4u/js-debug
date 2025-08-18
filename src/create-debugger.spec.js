@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import {inspect} from 'util';
 import {createSpy} from '@e22m4u/js-spy';
 import {createDebugger} from './create-debugger.js';
 import {DEFAULT_OFFSET_STEP_SPACES} from './create-debugger.js';
@@ -103,56 +102,6 @@ describe('createDebugger', function () {
       expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.equal(
         'format list: "a", 1, true',
       );
-    });
-
-    it('should output object inspection', function () {
-      process.env.DEBUG = 'obj';
-      const debug = createDebugger('obj');
-      const data = {a: 1, b: {c: 'deep'}};
-      debug(data);
-      const expectedInspect = inspect(data, {
-        colors: true,
-        depth: null,
-        compact: false,
-      });
-      const expectedLines = expectedInspect.split('\n');
-      expect(consoleLogSpy.callCount).to.equal(expectedLines.length);
-      expectedLines.forEach((line, index) => {
-        expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.contain(
-          'obj ',
-        );
-        expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.have.string(
-          stripAnsi(line),
-        );
-      });
-    });
-
-    it('should output object inspection with a description', function () {
-      process.env.DEBUG = 'objdesc';
-      const debug = createDebugger('objdesc');
-      const data = {email: 'test@example.com'};
-      const description = 'User data:';
-      debug(data, description);
-      const expectedInspect = inspect(data, {
-        colors: true,
-        depth: null,
-        compact: false,
-      });
-      const expectedLines = expectedInspect.split('\n');
-      const totalExpectedCalls = 1 + expectedLines.length;
-      expect(consoleLogSpy.callCount).to.equal(totalExpectedCalls);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
-        `objdesc ${description}`,
-      );
-      expectedLines.forEach((line, index) => {
-        const callIndex = index + 1;
-        expect(stripAnsi(consoleLogSpy.getCall(callIndex).args[0])).to.contain(
-          'objdesc ',
-        );
-        expect(
-          stripAnsi(consoleLogSpy.getCall(callIndex).args[0]),
-        ).to.have.string(stripAnsi(line));
-      });
     });
   });
 
@@ -306,41 +255,6 @@ describe('createDebugger', function () {
       );
       expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.be.eq(
         'app:service secondLine',
-      );
-    });
-
-    it('should add extra offset to dump if it has heading messages', function () {
-      process.env.DEBUG = 'app:service';
-      const debug = createDebugger('app', 'service');
-      const dummyData = {foo: 'bar', baz: 'qux'};
-      debug(dummyData, 'Data:');
-      expect(consoleLogSpy.callCount).to.be.eq(5);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.be.eq(
-        'app:service Data:',
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
-        new RegExp(
-          '^app:service\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}\\{',
-        ),
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.match(
-        new RegExp(
-          '^app:service\\s{' +
-            (DEFAULT_OFFSET_STEP_SPACES + 1) +
-            "}  foo: 'bar',",
-        ),
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(3).args[0])).to.match(
-        new RegExp(
-          '^app:service\\s{' +
-            (DEFAULT_OFFSET_STEP_SPACES + 1) +
-            "}  baz: 'qux'",
-        ),
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(4).args[0])).to.match(
-        new RegExp(
-          '^app:service\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}\\}',
-        ),
       );
     });
 
@@ -589,29 +503,6 @@ describe('createDebugger', function () {
       );
     });
 
-    it('should apply offset to all lines of object inspection', function () {
-      process.env.DEBUG = 'offsetobj';
-      const debug = createDebugger('offsetobj').withOffset(1);
-      const data = {a: 1, b: 2};
-      debug(data);
-      const expectedInspect = inspect(data, {
-        colors: true,
-        depth: null,
-        compact: false,
-      });
-      const expectedLines = expectedInspect.split('\n');
-      expect(consoleLogSpy.callCount).to.equal(expectedLines.length);
-      expectedLines.forEach((line, index) => {
-        // предполагая, что offsetStep = '   '
-        expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.match(
-          new RegExp('^offsetobj\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}'),
-        );
-        expect(stripAnsi(consoleLogSpy.getCall(index).args[0])).to.contain(
-          stripAnsi(line),
-        );
-      });
-    });
-
     it('should throw error if withOffset is called with invalid size', function () {
       const debug = createDebugger('app');
       expect(() => debug.withOffset(0)).to.throw(/must be a positive Number/);
@@ -638,27 +529,6 @@ describe('createDebugger', function () {
         ),
       );
     });
-
-    it('should add extra offset to dump if it has heading messages', function () {
-      process.env.DEBUG = '*';
-      const debug = createDebugger();
-      const dummyData = {foo: 'bar', baz: 'qux'};
-      debug(dummyData, 'Data:');
-      expect(consoleLogSpy.callCount).to.be.eq(5);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.be.eq('Data:');
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
-        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + '}\\{'),
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.match(
-        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + "}  foo: 'bar',"),
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(3).args[0])).to.match(
-        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + "}  baz: 'qux'"),
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(4).args[0])).to.match(
-        new RegExp('^\\s{' + DEFAULT_OFFSET_STEP_SPACES + '}\\}'),
-      );
-    });
   });
 
   describe('combine', function () {
@@ -679,44 +549,6 @@ describe('createDebugger', function () {
         ),
       );
     });
-
-    it('should combine features and output object correctly', function () {
-      process.env.DEBUG = 'app:svc';
-      const debug = createDebugger('app')
-        .withNs('svc')
-        .withHash(3)
-        .withOffset(1);
-      const data = {id: 123};
-      const description = 'Data:';
-      debug(data, description);
-      const expectedInspect = inspect(data, {
-        colors: true,
-        depth: null,
-        compact: false,
-      });
-      const expectedLines = expectedInspect.split('\n');
-      const totalExpectedCalls = 1 + expectedLines.length;
-      expect(consoleLogSpy.callCount).to.equal(totalExpectedCalls);
-      // предполагая, что offsetStep = '   '
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
-        new RegExp(
-          '^app:svc:[a-f0-9]{3}\\s{' +
-            (DEFAULT_OFFSET_STEP_SPACES + 1) +
-            '}Data:$',
-        ),
-      );
-      expectedLines.forEach((line, index) => {
-        const callIndex = index + 1;
-        const logLine = stripAnsi(consoleLogSpy.getCall(callIndex).args[0]);
-        // предполагая, что offsetStep = '   '
-        expect(logLine).to.match(
-          new RegExp(
-            '^app:svc:[a-f0-9]{3}\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}',
-          ),
-        );
-        expect(logLine).to.contain(stripAnsi(line));
-      });
-    });
   });
 
   describe('creation error', function () {
@@ -730,6 +562,119 @@ describe('createDebugger', function () {
       expect(() => createDebugger([])).to.throw(
         /must be a String or an Object/,
       );
+    });
+  });
+
+  describe('inspect method', function () {
+    it('should not output if debugger is disabled', function () {
+      process.env.DEBUG = 'other';
+      const debug = createDebugger('app');
+      debug.inspect({a: 1});
+      expect(consoleLogSpy.called).to.be.false;
+    });
+
+    it('should output a colorized dump of a single argument', function () {
+      process.env.DEBUG = 'app';
+      const debug = createDebugger('app');
+      const data = {user: {id: 1, name: 'test'}};
+      debug.inspect(data);
+      // createColorizedDump выводит многострочный результат,
+      // поэтому проверяем несколько вызовов console.log
+      expect(consoleLogSpy.callCount).to.be.above(1);
+      const firstLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+      const secondLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+      expect(firstLine).to.equal('app {');
+      // проверяем вторую строку с отступом,
+      // который добавляет createColorizedDump
+      expect(secondLine).to.match(/^app\s{3}user: \{$/);
+    });
+
+    it('should use the first argument as a description for the next ones', function () {
+      process.env.DEBUG = 'app';
+      const debug = createDebugger('app');
+      const data = {id: 123};
+      debug.inspect('User data:', data);
+      expect(consoleLogSpy.callCount).to.be.above(1);
+      const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+      const dumpLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+      expect(descriptionLine).to.equal('app User data:');
+      // проверка, что к дампу добавлен дополнительный отступ
+      const expectedInternalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);
+      expect(dumpLine).to.equal(`app ${expectedInternalOffset}{`);
+    });
+
+    describe('combine', function () {
+      it('should include namespace from withNs() in inspect output', function () {
+        process.env.DEBUG = 'app:svc';
+        const debug = createDebugger('app').withNs('svc');
+        debug.inspect('Data:', {a: 1});
+        const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+        expect(descriptionLine).to.equal('app:svc Data:');
+      });
+
+      it('should include hash from withHash() in inspect output', function () {
+        process.env.DEBUG = 'app';
+        const debug = createDebugger('app').withHash(6);
+        debug.inspect({a: 1});
+        const firstLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+        expect(firstLine).to.match(/^app:[a-f0-9]{6} \{$/);
+      });
+
+      it('should apply offset from withOffset() to inspect output', function () {
+        process.env.DEBUG = 'app';
+        const debug = createDebugger('app').withOffset(2);
+        debug.inspect('My Data:', {a: 1});
+        const offsetSpaces = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES * 2);
+        const internalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);
+        const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+        const dumpLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+        expect(descriptionLine).to.equal(`app${offsetSpaces} My Data:`);
+        // проверка применения отступа к дампу (префикс + внутренний отступ)
+        expect(dumpLine).to.equal(`app${offsetSpaces} ${internalOffset}{`);
+      });
+
+      it('should respect withoutEnvNs() in inspect output', function () {
+        process.env.DEBUG = '*';
+        process.env.DEBUGGER_NAMESPACE = 'myApp';
+        const debugWithEnv = createDebugger('api');
+        const debugWithoutEnv = debugWithEnv.withoutEnvNs();
+        // вызов inspect на исходном отладчике
+        debugWithEnv.inspect('With env');
+        expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+          "myApp:api 'With env'",
+        );
+        // вызов на новом отладчике
+        debugWithoutEnv.inspect('Without env');
+        expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal(
+          "api 'Without env'",
+        );
+      });
+
+      it('should combine all modifiers for inspect output', function () {
+        process.env.DEBUG = '*';
+        process.env.DEBUGGER_NAMESPACE = 'myApp';
+        const debug = createDebugger('api')
+          .withNs('users')
+          .withHash(4)
+          .withOffset(1)
+          .withoutEnvNs();
+        debug.inspect('User List:', [{id: 1}, {id: 2}]);
+        const offsetSpaces = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES * 1);
+        const internalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);
+        const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+        const dumpLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+        // проверка отсутствия DEBUGGER_NAMESPACE
+        expect(descriptionLine).to.not.contain('myApp');
+        // проверка всей строки с помощью регулярного выражения
+        expect(descriptionLine).to.match(
+          new RegExp(`^api:users:[a-f0-9]{4}${offsetSpaces} User List:$`),
+        );
+        expect(dumpLine).to.match(
+          new RegExp(
+            `^api:users:[a-f0-9]{4}${offsetSpaces} ${internalOffset}\\[$`,
+          ),
+        );
+      });
     });
   });
 });

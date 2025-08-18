@@ -229,33 +229,14 @@ export function createDebugger(
   function debugFn(messageOrData, ...args) {
     if (!isDebuggerEnabled()) return;
     const prefix = getPrefix();
-    if (typeof messageOrData === 'string') {
-      const multiString = format(messageOrData, ...args);
-      const rows = multiString.split('\n');
-      rows.forEach(message => {
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-      return;
-    }
-    const multiString = createColorizedDump(messageOrData);
+    const multiString = format(messageOrData, ...args);
     const rows = multiString.split('\n');
-    // если дамп объекта имеет заголовочные сообщения передаваемые
-    // в аргументах данной функции, то после вывода этих сообщений
-    // к дампу добавляется один шаг смещения, чтобы визуально связать
-    // дамп с заголовочными сообщениями
-    if (args.length) {
-      args.forEach(message => {
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-      rows.forEach(message => {
-        message = `${state.offsetStep}${message}`;
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-    } else {
-      rows.forEach(message => {
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-    }
+    rows.forEach(message => {
+      // (!) вывод сообщения отладки
+      // для сообщения может быть определен префикс,
+      // содержащий пространства имен и хэш операции
+      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+    });
   }
   // создание новой функции логирования
   // с дополнительным пространством имен
@@ -304,6 +285,40 @@ export function createDebugger(
     const stateCopy = JSON.parse(JSON.stringify(state));
     stateCopy.envNsSegments = [];
     return createDebugger(stateCopy);
+  };
+  // определение метода inspect, где значение первого аргумента будет
+  // использовано для дампа, а если передано два аргумента, то первый
+  // будет являться описанием для второго
+  debugFn.inspect = function (valueOrDesc, ...args) {
+    if (!isDebuggerEnabled()) return;
+    const prefix = getPrefix();
+    let multiString = '';
+    // если первый аргумент является строкой, при условии наличия
+    // других аргументов, то первое значение используется
+    // как заголовок
+    if (typeof valueOrDesc === 'string' && args.length) {
+      multiString += `${valueOrDesc}\n`;
+      // к дампу добавляется один шаг смещения,
+      // чтобы визуально связать дамп с заголовком
+      const multilineDump = args.map(v => createColorizedDump(v)).join('\n');
+      const dumpRows = multilineDump.split('\n');
+      multiString += dumpRows.map(v => `${state.offsetStep}${v}`).join('\n');
+    }
+    // если первый аргумент не является строкой,
+    // то все аргументы будут использованы
+    // как значения дампа
+    else {
+      multiString += [valueOrDesc, ...args]
+        .map(v => createColorizedDump(v))
+        .join('\n');
+    }
+    const rows = multiString.split('\n');
+    rows.forEach(message => {
+      // (!) вывод сообщения отладки
+      // для сообщения может быть определен префикс,
+      // содержащий пространства имен и хэш операции
+      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+    });
   };
   return debugFn;
 }

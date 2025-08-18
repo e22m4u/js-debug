@@ -259,29 +259,11 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
   function debugFn(messageOrData, ...args) {
     if (!isDebuggerEnabled()) return;
     const prefix = getPrefix();
-    if (typeof messageOrData === "string") {
-      const multiString2 = (0, import_js_format2.format)(messageOrData, ...args);
-      const rows2 = multiString2.split("\n");
-      rows2.forEach((message) => {
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-      return;
-    }
-    const multiString = createColorizedDump(messageOrData);
+    const multiString = (0, import_js_format2.format)(messageOrData, ...args);
     const rows = multiString.split("\n");
-    if (args.length) {
-      args.forEach((message) => {
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-      rows.forEach((message) => {
-        message = `${state.offsetStep}${message}`;
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-    } else {
-      rows.forEach((message) => {
-        prefix ? console.log(`${prefix} ${message}`) : console.log(message);
-      });
-    }
+    rows.forEach((message) => {
+      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+    });
   }
   __name(debugFn, "debugFn");
   debugFn.withNs = function(namespace, ...args) {
@@ -322,6 +304,24 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
     const stateCopy = JSON.parse(JSON.stringify(state));
     stateCopy.envNsSegments = [];
     return createDebugger(stateCopy);
+  };
+  debugFn.inspect = function(valueOrDesc, ...args) {
+    if (!isDebuggerEnabled()) return;
+    const prefix = getPrefix();
+    let multiString = "";
+    if (typeof valueOrDesc === "string" && args.length) {
+      multiString += `${valueOrDesc}
+`;
+      const multilineDump = args.map((v) => createColorizedDump(v)).join("\n");
+      const dumpRows = multilineDump.split("\n");
+      multiString += dumpRows.map((v) => `${state.offsetStep}${v}`).join("\n");
+    } else {
+      multiString += [valueOrDesc, ...args].map((v) => createColorizedDump(v)).join("\n");
+    }
+    const rows = multiString.split("\n");
+    rows.forEach((message) => {
+      prefix ? console.log(`${prefix} ${message}`) : console.log(message);
+    });
   };
   return debugFn;
 }

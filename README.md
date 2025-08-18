@@ -47,13 +47,13 @@ debug('Got values %l.', ['foo', 10, true]);
 // Got values "foo", 10, true.
 ```
 
-Дамп значений.
+Дамп значений (метод `debug.inspect`).
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-debug({
+debug.inspect({
   email: 'john.doe@example.com',
   phone: {
     mobile: '+1-555-123-4567',
@@ -75,11 +75,11 @@ debug({
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-debug({
+debug.inspect('Order details:', {
   orderId: 988,
   date: '2023-10-27',
   totalAmount: 120.50,
-}, 'Order details:');
+});
 
 // Order details:
 // {
@@ -94,9 +94,15 @@ debug({
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
-const debug1 = createDebugger('myApp');
-const debug2 = createDebugger('myApp', 'myService');
-const debug3 = createDebugger('myApp:myService');
+// вызов createDebugger() без аргументов создает
+// отладчик с пустым пространством имен
+const debug1 = createDebugger();
+
+// пространство имен можно передать в первом
+// аргументе фабрики, как это показано ниже
+const debug2 = createDebugger('myApp');
+const debug3 = createDebugger('myApp', 'myService');
+const debug4 = createDebugger('myApp:myService');
 debug1('Hello world');
 debug2('Hello world');
 debug3('Hello world');
@@ -186,12 +192,15 @@ import {createDebugger} from '@e22m4u/js-debug';
 const debug1 = createDebugger().withOffset(1);
 const debug2 = createDebugger().withOffset(2);
 const debug3 = createDebugger().withOffset(3);
+const debug4 = createDebugger('myApp').withOffset(1);
 debug1('Hello world');
 debug2('Hello world');
 debug3('Hello world');
+debug4('Hello world');
 // Hello world
 //    Hello world
 //        Hello world
+// myApp       Hello world
 ```
 
 Комбинирование методов.
@@ -212,7 +221,7 @@ const contact = {
 
 debug('Iterating over %v participants.', 10);
 debugWo1('Looking for contacts of %v participant.', 1);
-debugWo1(contact, 'Participant contacts found:');
+debugWo1.inspect('Participant contacts found:', contact);
 
 // myApp:myService:o3pk Iterating over 10 participants.
 // myApp:myService:o3pk   Looking for contacts of 1 participant.
