@@ -76,6 +76,8 @@ debug.inspect({
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
+// дополнительное сообщение передается
+// в метод inspect первым аргументом
 debug.inspect('Order details:', {
   orderId: 988,
   date: '2023-10-27',
