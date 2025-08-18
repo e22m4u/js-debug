@@ -47,12 +47,13 @@ debug('Got values %l.', ['foo', 10, true]);
 // Got values "foo", 10, true.
 ```
 
-Дамп значений (метод `debug.inspect`).
+Дамп значений.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
+// используется метод inspect
 debug.inspect({
   email: 'john.doe@example.com',
   phone: {
@@ -82,11 +83,11 @@ debug.inspect('Order details:', {
 });
 
 // Order details:
-// {
-//   orderId: 988,
-//   date: '2023-10-27',
-//   totalAmount: 120.50,
-// }
+//   {
+//     orderId: 988,
+//     date: '2023-10-27',
+//     totalAmount: 120.50,
+//   }
 ```
 
 Определение пространства имен.
@@ -226,13 +227,13 @@ debugWo1.inspect('Participant contacts found:', contact);
 // myApp:myService:o3pk Iterating over 10 participants.
 // myApp:myService:o3pk   Looking for contacts of 1 participant.
 // myApp:myService:o3pk   Participant contacts found:
-// myApp:myService:o3pk   {
-// myApp:myService:o3pk     email: 'john.doe@example.com',
-// myApp:myService:o3pk     phone: {
-// myApp:myService:o3pk       mobile: '+1-555-123-4567',
-// myApp:myService:o3pk       home: '+1-555-987-6543'
-// myApp:myService:o3pk     },
-// myApp:myService:o3pk   }
+// myApp:myService:o3pk     {
+// myApp:myService:o3pk       email: 'john.doe@example.com',
+// myApp:myService:o3pk       phone: {
+// myApp:myService:o3pk         mobile: '+1-555-123-4567',
+// myApp:myService:o3pk         home: '+1-555-987-6543'
+// myApp:myService:o3pk       },
+// myApp:myService:o3pk     }
 ```
 
 ## Управление выводом
