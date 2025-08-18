@@ -114,7 +114,7 @@ debug3('Hello world');
 // myApp:myService Hello world
 ```
 
-Использование пространства имен из переменной окружения `DEBUGGER_NAMESPACE`.
+Определение глобального пространства имен в переменной окружения.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -126,7 +126,7 @@ debug('Hello world');
 // myApp Hello world
 ```
 
-Исключение переменной окружения `DEBUGGER_NAMESPACE` из пространства имен.
+Отключение глобального пространства имен из переменной окружения.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
