@@ -70,13 +70,13 @@ debug.inspect({
 // }
 ```
 
-Дополнительное сообщение над дампом.
+Заголовочное сообщение над дампом.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-// дополнительное сообщение передается
+// заголовочное сообщение передается
 // в метод inspect первым аргументом
 debug.inspect('Order details:', {
   orderId: 988,
