@@ -193,7 +193,7 @@ import {createDebugger} from '@e22m4u/js-debug';
 const debug1 = createDebugger().withOffset(1);
 const debug2 = createDebugger().withOffset(2);
 const debug3 = createDebugger().withOffset(3);
-const debug4 = createDebugger('myApp').withOffset(1);
+const debug4 = createDebugger('myApp').withOffset(3);
 debug1('Hello world');
 debug2('Hello world');
 debug3('Hello world');
