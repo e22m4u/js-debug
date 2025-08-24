@@ -317,9 +317,11 @@ DEBUG=app:worker,legacy node main.js # только app:worker и legacy
 
 ## Класс Debuggable
 
-Класс реализует метод `getDebuggerFor(method: Function)`, позволяющий
-связывать сообщения отладки по названию метода и идентифицировать вызовы
-с помощью хэша.
+Класс реализует метод `getDebuggerFor(method: Function)`, который принимает
+любой другой метод данного класса и возвращает новый отладчик,
+сконфигурированный так, чтобы пространство имен отладчика содержало название
+класса, название метода и хэш, позволяющий различать сообщения отладки
+одного в разных вызовах.
 
 ```
 ┌────────────────────────────────────┐
@@ -365,8 +367,8 @@ class Calculator extends Debuggable {
 }
 
 const calculator = new Calculator();
-calculator.multiply(4, 8);
-calculator.multiply(6, 10);
+calculator.multiply(4, 8);  // первый вызов (хэш: 4d8w)
+calculator.multiply(6, 10); // повторный вызов (хэш: v54w)
 calculator.divide(32, 8);
 calculator.divide(60, 10);
 // calculator:constructor:ds83 Instantiated.
