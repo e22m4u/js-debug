@@ -320,5 +320,8 @@ export function createDebugger(
       prefix ? console.log(`${prefix} ${message}`) : console.log(message);
     });
   };
+  // сохранение состояния в отдельное свойство отладчика
+  // позволяет проверить настройки без вызова реализации
+  debugFn.state = state;
   return debugFn;
 }

@@ -386,6 +386,7 @@ function createDebugger(namespaceOrOptions = void 0, ...namespaceSegments) {
       prefix ? console.log(`${prefix} ${message}`) : console.log(message);
     });
   };
+  debugFn.state = state;
   return debugFn;
 }
 __name(createDebugger, "createDebugger");

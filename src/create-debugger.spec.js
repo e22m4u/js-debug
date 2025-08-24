@@ -66,6 +66,14 @@ describe('createDebugger', function () {
       expect(debug.withOffset).to.be.a('function');
     });
 
+    it('should set the "state" property with DebuggerState object', function () {
+      const debug = createDebugger('test');
+      const state = debug.state;
+      console.log(state);
+      expect(typeof state).to.be.eq('object');
+      expect(state.nsSegments).to.be.eql(['test']);
+    });
+
     it('should output a simple string message when enabled', function () {
       process.env.DEBUG = 'test';
       const debug = createDebugger('test');
