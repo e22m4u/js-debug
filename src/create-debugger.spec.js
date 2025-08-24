@@ -1,11 +1,8 @@
 import {expect} from 'chai';
 import {createSpy} from '@e22m4u/js-spy';
+import {stripAnsi} from './utils/strip-ansi.js';
 import {createDebugger} from './create-debugger.js';
 import {DEFAULT_OFFSET_STEP_SPACES} from './create-debugger.js';
-
-// вспомогательная функция для удаления ANSI escape-кодов (цветов)
-// eslint-disable-next-line no-control-regex
-const stripAnsi = str => str.replace(/\x1b\[[0-9;]*m/g, '');
 
 describe('createDebugger', function () {
   let consoleLogSpy;

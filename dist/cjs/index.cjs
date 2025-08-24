@@ -2,6 +2,7 @@ var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var __export = (target, all) => {
   for (var name in all)
@@ -16,20 +17,27 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
 // src/index.js
 var index_exports = {};
 __export(index_exports, {
   DEFAULT_OFFSET_STEP_SPACES: () => DEFAULT_OFFSET_STEP_SPACES,
+  DebuggableService: () => DebuggableService,
   INSPECT_OPTIONS: () => INSPECT_OPTIONS,
   createColorizedDump: () => createColorizedDump,
   createDebugger: () => createDebugger
 });
 module.exports = __toCommonJS(index_exports);
 
-// src/create-debugger.js
-var import_js_format = require("@e22m4u/js-format");
-var import_js_format2 = require("@e22m4u/js-format");
+// src/services/debuggable-service.js
+var import_js_service = require("@e22m4u/js-service");
+
+// src/utils/to-camel-case.js
+function toCamelCase(input) {
+  return input.replace(/(^\w|[A-Z]|\b\w)/g, (c) => c.toUpperCase()).replace(/\W+/g, "").replace(/(^\w)/g, (c) => c.toLowerCase());
+}
+__name(toCamelCase, "toCamelCase");
 
 // src/utils/is-non-array-object.js
 function isNonArrayObject(input) {
@@ -54,6 +62,50 @@ function generateRandomHex(length = 4) {
   return result;
 }
 __name(generateRandomHex, "generateRandomHex");
+
+// src/services/debuggable-service.js
+var _DebuggableService = class _DebuggableService extends import_js_service.Service {
+  /**
+   * Debug.
+   *
+   * @type {Function}
+   */
+  debug;
+  /**
+   * Возвращает функцию-отладчик с сегментом пространства имен
+   * указанного в параметре метода.
+   *
+   * @param {Function} method
+   * @returns {Function}
+   */
+  getDebuggerFor(method) {
+    return this.debug.withHash().withNs(method.name);
+  }
+  /**
+   * Constructor.
+   *
+   * @param {object|undefined} container
+   */
+  constructor(container) {
+    super(container);
+    const serviceName = toCamelCase(this.constructor.name);
+    this.debug = createDebugger(serviceName);
+    const debug = this.debug.withNs("constructor").withHash();
+    debug(_DebuggableService.INSTANTIATION_MESSAGE);
+  }
+};
+__name(_DebuggableService, "DebuggableService");
+/**
+ * Instantiation message;
+ *
+ * @type {string}
+ */
+__publicField(_DebuggableService, "INSTANTIATION_MESSAGE", "Instantiated.");
+var DebuggableService = _DebuggableService;
+
+// src/create-debugger.js
+var import_js_format = require("@e22m4u/js-format");
+var import_js_format2 = require("@e22m4u/js-format");
 
 // src/create-colorized-dump.js
 var import_util = require("util");
@@ -329,6 +381,7 @@ __name(createDebugger, "createDebugger");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DEFAULT_OFFSET_STEP_SPACES,
+  DebuggableService,
   INSPECT_OPTIONS,
   createColorizedDump,
   createDebugger

@@ -38,7 +38,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@e22m4u/js-format": "~0.1.8"
+    "@e22m4u/js-format": "~0.1.8",
+    "@e22m4u/js-service": "~0.3.3"
   },
   "devDependencies": {
     "@commitlint/cli": "~19.8.1",
