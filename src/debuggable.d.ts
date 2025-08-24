@@ -1,16 +1,27 @@
-import {Callable} from '../types.js';
-import {Service} from '@e22m4u/js-service';
-import {Debugger} from '../create-debugger.js';
-import {ServiceContainer} from '@e22m4u/js-service';
+import {Callable} from './types.js';
+import {Debugger} from './create-debugger.js';
 
 /**
- * Debuggable Service.
+ * Debuggable options.
  */
-export class DebuggableService extends Service {
+export type DebuggableOptions = {
+  namespace: string,
+  noEnvNs: string,
+}
+
+/**
+ * Debuggable.
+ */
+export class Debuggable {
   /**
    * Debug.
    */
   debug: Debugger;
+
+  /**
+   * Debug.
+   */
+  ctorDebug: Debugger;
 
   /**
    * Возвращает функцию-отладчик с сегментом пространства имен
@@ -25,6 +36,7 @@ export class DebuggableService extends Service {
    * Constructor.
    *
    * @param container
+   * @param options
    */
-  constructor(container?: ServiceContainer);
+  constructor(options?: DebuggableOptions);
 }

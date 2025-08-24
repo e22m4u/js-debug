@@ -23,15 +23,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 var index_exports = {};
 __export(index_exports, {
   DEFAULT_OFFSET_STEP_SPACES: () => DEFAULT_OFFSET_STEP_SPACES,
-  DebuggableService: () => DebuggableService,
+  Debuggable: () => Debuggable,
   INSPECT_OPTIONS: () => INSPECT_OPTIONS,
   createColorizedDump: () => createColorizedDump,
   createDebugger: () => createDebugger
 });
 module.exports = __toCommonJS(index_exports);
-
-// src/services/debuggable-service.js
-var import_js_service = require("@e22m4u/js-service");
 
 // src/utils/to-camel-case.js
 function toCamelCase(input) {
@@ -63,14 +60,20 @@ function generateRandomHex(length = 4) {
 }
 __name(generateRandomHex, "generateRandomHex");
 
-// src/services/debuggable-service.js
-var _DebuggableService = class _DebuggableService extends import_js_service.Service {
+// src/debuggable.js
+var _Debuggable = class _Debuggable {
   /**
    * Debug.
    *
    * @type {Function}
    */
   debug;
+  /**
+   * Ctor Debug.
+   *
+   * @type {Function}
+   */
+  ctorDebug;
   /**
    * Возвращает функцию-отладчик с сегментом пространства имен
    * указанного в параметре метода.
@@ -85,23 +88,31 @@ var _DebuggableService = class _DebuggableService extends import_js_service.Serv
    * Constructor.
    *
    * @param {object|undefined} container
+   * @param {DebuggableOptions|undefined} options
    */
-  constructor(container) {
-    super(container);
-    const serviceName = toCamelCase(this.constructor.name);
-    this.debug = createDebugger(serviceName);
-    const debug = this.debug.withNs("constructor").withHash();
-    debug(_DebuggableService.INSTANTIATION_MESSAGE);
+  constructor(options = void 0) {
+    const className = toCamelCase(this.constructor.name);
+    options = typeof options === "object" && options || {};
+    const namespace = options.namespace && String(options.namespace) || void 0;
+    if (namespace) {
+      this.debug = createDebugger(namespace, className);
+    } else {
+      this.debug = createDebugger(className);
+    }
+    const noEnvNs = Boolean(options.noEnvNs);
+    if (noEnvNs) this.debug = this.debug.withoutEnvNs();
+    this.ctorDebug = this.debug.withNs("constructor").withHash();
+    this.ctorDebug(_Debuggable.INSTANTIATION_MESSAGE);
   }
 };
-__name(_DebuggableService, "DebuggableService");
+__name(_Debuggable, "Debuggable");
 /**
  * Instantiation message;
  *
  * @type {string}
  */
-__publicField(_DebuggableService, "INSTANTIATION_MESSAGE", "Instantiated.");
-var DebuggableService = _DebuggableService;
+__publicField(_Debuggable, "INSTANTIATION_MESSAGE", "Instantiated.");
+var Debuggable = _Debuggable;
 
 // src/create-debugger.js
 var import_js_format = require("@e22m4u/js-format");
@@ -381,7 +392,7 @@ __name(createDebugger, "createDebugger");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DEFAULT_OFFSET_STEP_SPACES,
-  DebuggableService,
+  Debuggable,
   INSPECT_OPTIONS,
   createColorizedDump,
   createDebugger

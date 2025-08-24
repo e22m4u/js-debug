@@ -10,6 +10,7 @@
   * [Node.js: Переменная окружения DEBUG](#nodejs-переменная-окружения-debug)
   * [Браузер: localStorage.debug](#браузер-localstoragedebug)
   * [Синтаксис паттернов](#синтаксис-паттернов)
+* [Класс Debuggable](#класс-debuggable)
 * [Тесты](#тесты)
 * [Лицензия](#лицензия)
 
@@ -53,7 +54,7 @@ debug('Got values %l.', ['foo', 10, true]);
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-// используется метод inspect
+// (!) используется метод inspect
 debug.inspect({
   email: 'john.doe@example.com',
   phone: {
@@ -100,15 +101,17 @@ import {createDebugger} from '@e22m4u/js-debug';
 // вызов createDebugger() без аргументов создает
 // отладчик с пустым пространством имен
 const debug1 = createDebugger();
+debug1('Hello world');
+// Hello world
 
 // пространство имен можно передать в первом
 // аргументе фабрики, как это показано ниже
 const debug2 = createDebugger('myApp');
 const debug3 = createDebugger('myApp', 'myService');
 const debug4 = createDebugger('myApp:myService');
-debug1('Hello world');
 debug2('Hello world');
 debug3('Hello world');
+debug4('Hello world');
 // myApp Hello world
 // myApp:myService Hello world
 // myApp:myService Hello world
@@ -299,7 +302,7 @@ localStorage.debug = '';
 
 - Точное совпадение (например, `myApp:myService`);
 - Wildcard (\*): `myApp*` соответствует `myApp`, `myApp:myService` и т.д.;
-- Несколько паттернов можно указать разделив из запятой или пробелом;
+- Несколько паттернов можно указать разделив их запятой или пробелом;
 - Включить всё: `*` включает вывод для всех пространств имен;
 
 Примеры шаблонов в окружении Node.js:
@@ -310,6 +313,166 @@ DEBUG=* node main.js # выведет все сообщения
 DEBUG=app node main.js # только пространство имен app
 DEBUG=app:* node main.js # пространства имен с префиксом app:
 DEBUG=app:worker,legacy node main.js # только app:worker и legacy
+```
+
+## Класс Debuggable
+
+Класс реализует метод `getDebuggerFor(method: Function)`, позволяющий
+связывать сообщения отладки по названию метода и идентифицировать вызовы
+с помощью хэша.
+
+```
+┌────────────────────────────────────┐
+│ класс      | метод    | хэш вызова │
+" calculator : multiply : ds83       "
+└────────────────────────────────────┘
+```
+
+Создание экземпляра автоматически логируется.
+
+```js
+import {Debuggable} from '@e22m4u/js-debug';
+
+class MyClass extends Debuggable {}
+
+new MyClass();
+// myClass:constructor:f12s Instantiated.
+```
+
+Пример вывода сообщений отладки двух методов одного класса.
+
+```js
+import {Debuggable} from '@e22m4u/js-debug';
+
+process.env['DEBUG'] = '*';
+
+class Calculator extends Debuggable {
+  multiply(a, b) {
+    const debug = this.getDebuggerFor(this.multiply); // <=
+    debug('Multiplying %v by %v.');
+    const res = a * b;
+    debug('Result %v.');
+    return res;
+  }
+
+  divide(a, b) {
+    const debug = this.getDebuggerFor(this.divide); // <=
+    debug('Dividing %v by %v.');
+    const res = a / b;
+    debug('Result %v.');
+    return res;
+  }
+}
+
+const calculator = new Calculator();
+calculator.multiply(4, 8);
+calculator.multiply(6, 10);
+calculator.divide(32, 8);
+calculator.divide(60, 10);
+// calculator:constructor:ds83 Instantiated.
+// calculator:multiply:4d8w Multiplying 4 by 8.
+// calculator:multiply:4d8w Result 32.
+// calculator:multiply:v54w Multiplying 6 by 10.
+// calculator:multiply:v54w Result 60.
+// calculator:divide:c9ew Dividing 32 by 8.
+// calculator:divide:c9ew Result 4.
+// calculator:divide:twq2 Dividing 60 by 10.
+// calculator:divide:twq2 Result 6.
+```
+
+Использование переменной окружения `DEBUGGER_NAMESPACE`.
+
+```js
+import {Debuggable} from '@e22m4u/js-debug';
+
+process.env['DEBUGGER_NAMESPACE'] = 'myApp'; // <=
+process.env['DEBUG'] = 'myApp*';
+
+class Calculator extends Debuggable {
+  multiply(a, b) {
+    const debug = this.getDebuggerFor(this.multiply);
+    debug('Multiplying %v by %v.');
+    const res = a * b;
+    debug('Result %v.');
+    return res;
+  }
+}
+
+const calculator = new Calculator();
+calculator.multiply(4, 8);
+// myApp:calculator:constructor:ds83 Instantiated.
+// myApp:calculator:multiply:4d8w Multiplying 4 by 8.
+// myApp:calculator:multiply:4d8w Result 32.
+```
+
+### DebuggableOptions
+
+Первый аргумент класса `Debuggable` принимает объект со следующими свойствами.
+
+- `namespace?: string` - префиксное пространство имен;
+- `noEnvNs?: boolean` - игнорировать переменную `DEBUGGER_NAMESPACE`;
+
+#### DebuggableOptions.namespace
+
+Значение опции `namespace` добавляет префиксное пространство имен.
+
+```js
+import {Debuggable} from '@e22m4u/js-debug';
+
+process.env['DEBUG'] = 'myApp*';
+
+class Calculator extends Debuggable {
+  constructor() {
+    super({namespace: 'myApp'}); // <=
+  }
+
+  multiply(a, b) {
+    const debug = this.getDebuggerFor(this.multiply);
+    debug('Multiplying %v by %v.');
+    const res = a * b;
+    debug('Result %v.');
+    return res;
+  }
+}
+
+const calculator = new Calculator();
+calculator.multiply(4, 8);
+// myApp:calculator:constructor:ds83 Instantiated.
+// myApp:calculator:multiply:4d8w Multiplying 4 by 8.
+// myApp:calculator:multiply:4d8w Result 32.
+```
+
+#### DebuggableOptions.noEnvNs
+
+Значение `true` опции `noEnvNs` позволяет игнорировать переменную
+окружения `DEBUGGER_NAMESPACE`, устанавливающую префиксное пространство
+имен.
+
+```js
+import {Debuggable} from '@e22m4u/js-debug';
+
+process.env['DEBUGGER_NAMESPACE'] = 'myApp'; // <=
+process.env['DEBUG'] = '*';
+
+class Calculator extends Debuggable {
+  constructor() {
+    super({noEnvNs: true}); // <=
+  }
+
+  multiply(a, b) {
+    const debug = this.getDebuggerFor(this.multiply);
+    debug('Multiplying %v by %v.');
+    const res = a * b;
+    debug('Result %v.');
+    return res;
+  }
+}
+
+const calculator = new Calculator();
+calculator.multiply(4, 8);
+// calculator:constructor:ds83 Instantiated.
+// calculator:multiply:4d8w Multiplying 4 by 8.
+// calculator:multiply:4d8w Result 32.
 ```
 
 ## Тесты
