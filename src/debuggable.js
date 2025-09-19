@@ -4,7 +4,7 @@ import {createDebugger} from '@e22m4u/js-debug';
 /**
  * @typedef {{
  *   namespace: string,
- *   noEnvNs: string,
+ *   noEnvNs: boolean,
  * }} DebuggableOptions
  */
 
