@@ -5,6 +5,7 @@ import {createDebugger} from '@e22m4u/js-debug';
  * @typedef {{
  *   namespace: string,
  *   noEnvNs: boolean,
+ *   noInstMsg: boolean,
  * }} DebuggableOptions
  */
 
@@ -68,6 +69,7 @@ export class Debuggable {
     if (noEnvNs) this.debug = this.debug.withoutEnvNs();
 
     this.ctorDebug = this.debug.withNs('constructor').withHash();
-    this.ctorDebug(Debuggable.INSTANTIATION_MESSAGE);
+    const noInstMsg = Boolean(options.noInstMsg);
+    if (!noInstMsg) this.ctorDebug(Debuggable.INSTANTIATION_MESSAGE);
   }
 }

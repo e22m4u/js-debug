@@ -102,7 +102,8 @@ var _Debuggable = class _Debuggable {
     const noEnvNs = Boolean(options.noEnvNs);
     if (noEnvNs) this.debug = this.debug.withoutEnvNs();
     this.ctorDebug = this.debug.withNs("constructor").withHash();
-    this.ctorDebug(_Debuggable.INSTANTIATION_MESSAGE);
+    const noInstMsg = Boolean(options.noInstMsg);
+    if (!noInstMsg) this.ctorDebug(_Debuggable.INSTANTIATION_MESSAGE);
   }
 };
 __name(_Debuggable, "Debuggable");

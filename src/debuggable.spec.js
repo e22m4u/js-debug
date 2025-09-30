@@ -109,6 +109,14 @@ describe('Debuggable', function () {
         );
       });
     });
+
+    describe('"noInstMsg" option', function () {
+      it('should hide instantiation message', function () {
+        process.env.DEBUG = '*';
+        new Debuggable({noInstMsg: true});
+        expect(consoleLogSpy.callCount).to.equal(0);
+      });
+    });
   });
 
   describe('getDebuggerFor', function () {

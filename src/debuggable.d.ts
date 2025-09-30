@@ -7,6 +7,7 @@ import {Debugger} from './create-debugger.js';
 export type DebuggableOptions = {
   namespace: string,
   noEnvNs: boolean,
+  noInstMsg: boolean,
 }
 
 /**
