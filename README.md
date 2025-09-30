@@ -413,6 +413,7 @@ calculator.multiply(4, 8);
 
 - `namespace?: string` - префиксное пространство имен;
 - `noEnvNs?: boolean` - игнорировать переменную `DEBUGGER_NAMESPACE`;
+- `noInstMsg?: boolean` - не выводить сообщение о создании экземпляра;
 
 #### DebuggableOptions.namespace
 
