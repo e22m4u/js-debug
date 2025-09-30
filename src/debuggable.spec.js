@@ -86,11 +86,11 @@ describe('Debuggable', function () {
       });
     });
 
-    describe('"noEnvNs" option', function () {
-      it('should use DEBUGGER_NAMESPACE when the option "noEnvNs" is false', function () {
+    describe('"noEnvironmentNamespace" option', function () {
+      it('should use DEBUGGER_NAMESPACE when the option "noEnvironmentNamespace" is false', function () {
         process.env.DEBUGGER_NAMESPACE = 'myApp';
         process.env.DEBUG = '*';
-        new Debuggable({noEnvNs: false});
+        new Debuggable({noEnvironmentNamespace: false});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
         expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
@@ -98,10 +98,10 @@ describe('Debuggable', function () {
         );
       });
 
-      it('should skip DEBUGGER_NAMESPACE when the option "noEnvNs" is true', function () {
+      it('should skip DEBUGGER_NAMESPACE when the option "noEnvironmentNamespace" is true', function () {
         process.env.DEBUGGER_NAMESPACE = 'myApp';
         process.env.DEBUG = '*';
-        new Debuggable({noEnvNs: true});
+        new Debuggable({noEnvironmentNamespace: true});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
         expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
@@ -110,10 +110,10 @@ describe('Debuggable', function () {
       });
     });
 
-    describe('"noInstMsg" option', function () {
+    describe('"noInstantiationMessage" option', function () {
       it('should hide instantiation message', function () {
         process.env.DEBUG = '*';
-        new Debuggable({noInstMsg: true});
+        new Debuggable({noInstantiationMessage: true});
         expect(consoleLogSpy.callCount).to.equal(0);
       });
     });

@@ -412,8 +412,8 @@ calculator.multiply(4, 8);
 Первый аргумент класса `Debuggable` принимает объект со следующими свойствами.
 
 - `namespace?: string` - префиксное пространство имен;
-- `noEnvNs?: boolean` - игнорировать переменную `DEBUGGER_NAMESPACE`;
-- `noInstMsg?: boolean` - не выводить сообщение о создании экземпляра;
+- `noEnvironmentNamespace?: boolean` - игнорировать переменную `DEBUGGER_NAMESPACE`;
+- `noInstantiationMessage?: boolean` - не выводить сообщение о создании экземпляра;
 
 #### DebuggableOptions.namespace
 
@@ -445,11 +445,11 @@ calculator.multiply(4, 8);
 // myApp:calculator:multiply:4d8w Result 32.
 ```
 
-#### DebuggableOptions.noEnvNs
+#### DebuggableOptions.noEnvironmentNamespace
 
-Значение `true` опции `noEnvNs` позволяет игнорировать переменную
-окружения `DEBUGGER_NAMESPACE`, устанавливающую префиксное пространство
-имен.
+Значение `true` опции `noEnvironmentNamespace` позволяет игнорировать
+переменную окружения `DEBUGGER_NAMESPACE`, устанавливающую префиксное
+пространство имен.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
@@ -459,7 +459,7 @@ process.env['DEBUG'] = '*';
 
 class Calculator extends Debuggable {
   constructor() {
-    super({noEnvNs: true}); // <=
+    super({noEnvironmentNamespace: true}); // <=
   }
 
   multiply(a, b) {

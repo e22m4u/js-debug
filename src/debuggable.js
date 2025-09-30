@@ -3,9 +3,9 @@ import {createDebugger} from '@e22m4u/js-debug';
 
 /**
  * @typedef {{
- *   namespace: string,
- *   noEnvNs: boolean,
- *   noInstMsg: boolean,
+ *   namespace?: string,
+ *   noEnvironmentNamespace?: boolean,
+ *   noInstantiationMessage?: boolean,
  * }} DebuggableOptions
  */
 
@@ -42,13 +42,13 @@ export class Debuggable {
    * @returns {Function}
    */
   getDebuggerFor(method) {
-    return this.debug.withHash().withNs(method.name);
+    const name = method.name || 'anonymous';
+    return this.debug.withHash().withNs(name);
   }
 
   /**
    * Constructor.
    *
-   * @param {object|undefined} container
    * @param {DebuggableOptions|undefined} options
    */
   constructor(options = undefined) {
@@ -63,13 +63,14 @@ export class Debuggable {
     } else {
       this.debug = createDebugger(className);
     }
-    // опция "noEnvNs" отключает пространство имен
+    // опция "noEnvironmentNamespace" отключает пространство имен
     // из переменной окружения DEBUGGER_NAMESPACE
-    const noEnvNs = Boolean(options.noEnvNs);
-    if (noEnvNs) this.debug = this.debug.withoutEnvNs();
+    const noEnvironmentNamespace = Boolean(options.noEnvironmentNamespace);
+    if (noEnvironmentNamespace) this.debug = this.debug.withoutEnvNs();
 
     this.ctorDebug = this.debug.withNs('constructor').withHash();
-    const noInstMsg = Boolean(options.noInstMsg);
-    if (!noInstMsg) this.ctorDebug(Debuggable.INSTANTIATION_MESSAGE);
+    const noInstantiationMessage = Boolean(options.noInstantiationMessage);
+    if (!noInstantiationMessage)
+      this.ctorDebug(Debuggable.INSTANTIATION_MESSAGE);
   }
 }
