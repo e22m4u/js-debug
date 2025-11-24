@@ -88,7 +88,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'other';
       const debug = createDebugger('test');
       debug('hello world');
-      expect(consoleLogSpy.called).to.be.false;
+      expect(consoleLogSpy.isCalled).to.be.false;
     });
 
     it('should output formatted string messages using %s, %v, %l', function () {
@@ -297,14 +297,14 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'app:service';
       const debug = createDebugger('app:service');
       debug('message');
-      expect(consoleLogSpy.called).to.be.true;
+      expect(consoleLogSpy.isCalled).to.be.true;
     });
 
     it('should disable debugger if no match in DEBUG', function () {
       process.env.DEBUG = 'app:other';
       const debug = createDebugger('app:service');
       debug('message');
-      expect(consoleLogSpy.called).to.be.false;
+      expect(consoleLogSpy.isCalled).to.be.false;
     });
 
     it('should enable debugger based on wildcard match in DEBUG (*)', function () {
@@ -575,7 +575,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'other';
       const debug = createDebugger('app');
       debug.inspect({a: 1});
-      expect(consoleLogSpy.called).to.be.false;
+      expect(consoleLogSpy.isCalled).to.be.false;
     });
 
     it('should output a colorized dump of a single argument', function () {
