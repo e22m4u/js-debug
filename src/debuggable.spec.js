@@ -47,7 +47,7 @@ describe('Debuggable', function () {
       new Debuggable();
       expect(consoleLogSpy.callCount).to.equal(1);
       const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         new RegExp(`^debuggable:constructor:[a-f0-9]{4} ${msg}$`),
       );
     });
@@ -58,7 +58,7 @@ describe('Debuggable', function () {
       new Debuggable();
       expect(consoleLogSpy.callCount).to.equal(1);
       const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         new RegExp(`^myApp:debuggable:constructor:[a-f0-9]{4} ${msg}$`),
       );
     });
@@ -69,7 +69,7 @@ describe('Debuggable', function () {
       new MyService();
       expect(consoleLogSpy.callCount).to.equal(1);
       const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         new RegExp(`^myService:constructor:[a-f0-9]{4} ${msg}$`),
       );
     });
@@ -80,7 +80,7 @@ describe('Debuggable', function () {
         new Debuggable({namespace: 'myApp'});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
-        expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+        expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
           new RegExp(`^myApp:debuggable:constructor:[a-f0-9]{4} ${msg}$`),
         );
       });
@@ -93,7 +93,7 @@ describe('Debuggable', function () {
         new Debuggable({noEnvironmentNamespace: false});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
-        expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+        expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
           new RegExp(`^myApp:debuggable:constructor:[a-f0-9]{4} ${msg}$`),
         );
       });
@@ -104,7 +104,7 @@ describe('Debuggable', function () {
         new Debuggable({noEnvironmentNamespace: true});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
-        expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+        expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
           new RegExp(`^debuggable:constructor:[a-f0-9]{4} ${msg}$`),
         );
       });
@@ -131,7 +131,7 @@ describe('Debuggable', function () {
       const myService = new MyService();
       myService.myMethod();
       expect(consoleLogSpy.callCount).to.equal(2);
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.match(
         new RegExp(`^myService:myMethod:[a-f0-9]{4} Message$`),
       );
     });

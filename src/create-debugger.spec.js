@@ -79,7 +79,7 @@ describe('createDebugger', function () {
       const debug = createDebugger('test');
       debug('hello world');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'test hello world',
       );
     });
@@ -98,13 +98,13 @@ describe('createDebugger', function () {
       debug('value is %v', 123);
       debug('list: %l', ['a', 1, true]);
       expect(consoleLogSpy.callCount).to.equal(3);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'format hello world',
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.equal(
         'format value is 123',
       );
-      expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[2].args[0])).to.equal(
         'format list: "a", 1, true',
       );
     });
@@ -115,9 +115,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'app';
       const debug = createDebugger('app');
       debug('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
-        'app message',
-      );
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal('app message');
     });
 
     it('should use multiple namespace segments provided in createDebugger', function () {
@@ -125,7 +123,7 @@ describe('createDebugger', function () {
       const debug = createDebugger('app', 'service', 'module');
       debug('multi segment message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:service:module multi segment message',
       );
     });
@@ -135,7 +133,7 @@ describe('createDebugger', function () {
       const debug = createDebugger('service', 'module');
       debug('segments only message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'service:module segments only message',
       );
     });
@@ -146,7 +144,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'base';
       const debug = createDebugger();
       debug('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'base message',
       );
     });
@@ -156,7 +154,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'base:app';
       const debug = createDebugger('app');
       debug('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'base:app message',
       );
     });
@@ -167,7 +165,7 @@ describe('createDebugger', function () {
       const debug = createDebugger('app', 'svc');
       debug('env plus multi segment message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'base:app:svc env plus multi segment message',
       );
     });
@@ -178,7 +176,7 @@ describe('createDebugger', function () {
       const debugApp = createDebugger('app');
       const debugService = debugApp.withNs('service');
       debugService('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:service message',
       );
     });
@@ -188,7 +186,7 @@ describe('createDebugger', function () {
       const debugApp = createDebugger('app');
       const debugService = debugApp.withNs('service', 'module');
       debugService('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:service:module message',
       );
     });
@@ -197,7 +195,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'app:service:module';
       const debug = createDebugger('app').withNs('service').withNs('module');
       debug('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:service:module message',
       );
     });
@@ -208,7 +206,7 @@ describe('createDebugger', function () {
       const debugMod = debugBase.withNs('mod');
       debugMod('multi create then withNs');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:svc:mod multi create then withNs',
       );
     });
@@ -221,7 +219,7 @@ describe('createDebugger', function () {
       const debugService = debugBase.withNs('service');
       debugService('message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'envNs:service message',
       );
     });
@@ -233,7 +231,7 @@ describe('createDebugger', function () {
       const debugAdded = debugBase.withNs('added');
       debugAdded('combined message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'envNs:init1:init2:added combined message',
       );
     });
@@ -245,7 +243,7 @@ describe('createDebugger', function () {
       const debugService = debugBase.withNs('service');
       debugService('message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:service message',
       );
     });
@@ -255,10 +253,10 @@ describe('createDebugger', function () {
       const debug = createDebugger('app', 'service');
       debug('firstLine\nsecondLine');
       expect(consoleLogSpy.callCount).to.equal(2);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.be.eq(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.be.eq(
         'app:service firstLine',
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.be.eq(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.be.eq(
         'app:service secondLine',
       );
     });
@@ -316,10 +314,10 @@ describe('createDebugger', function () {
       debugDb('message db');
       debugOther('message other');
       expect(consoleLogSpy.callCount).to.equal(2);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'app:service message svc',
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.equal(
         'app:db message db',
       );
     });
@@ -346,13 +344,11 @@ describe('createDebugger', function () {
       debugSvcOther('4');
       debugOther('5');
       expect(consoleLogSpy.callCount).to.equal(3);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.contain(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.contain(
         'app:service 1',
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.contain(
-        'app:db 2',
-      );
-      expect(stripAnsi(consoleLogSpy.getCall(2).args[0])).to.contain(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.contain('app:db 2');
+      expect(stripAnsi(consoleLogSpy.calls[2].args[0])).to.contain(
         'svc:auth 3',
       );
     });
@@ -366,10 +362,10 @@ describe('createDebugger', function () {
       debugSvcAuth('3');
       debugOther('5');
       expect(consoleLogSpy.callCount).to.equal(2);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.contain(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.contain(
         'app:service 1',
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.contain(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.contain(
         'svc:auth 3',
       );
     });
@@ -381,7 +377,7 @@ describe('createDebugger', function () {
       debugLocal('message local');
       debugOther('message other');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'local:test message local',
       );
     });
@@ -394,7 +390,7 @@ describe('createDebugger', function () {
       debugEnv('message env');
       debugLocal('message local');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'env:test message env',
       );
     });
@@ -406,12 +402,12 @@ describe('createDebugger', function () {
       const debug2 = debug1.withoutEnvNs();
       debug1('message 1');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
         'myApp message 1',
       );
       debug2('message 2');
       expect(consoleLogSpy.callCount).to.equal(2);
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal('message 2');
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.equal('message 2');
     });
   });
 
@@ -421,7 +417,7 @@ describe('createDebugger', function () {
       const debug = createDebugger('hash').withHash();
       debug('message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         /^hash:[a-f0-9]{4} message$/,
       );
     });
@@ -432,10 +428,10 @@ describe('createDebugger', function () {
       debug('message1');
       debug('message2');
       expect(consoleLogSpy.callCount).to.equal(2);
-      const hash1 = stripAnsi(consoleLogSpy.getCall(0).args[0]).match(
+      const hash1 = stripAnsi(consoleLogSpy.calls[0].args[0]).match(
         /hash:([a-f0-9]{4})/,
       )[1];
-      const hash2 = stripAnsi(consoleLogSpy.getCall(1).args[0]).match(
+      const hash2 = stripAnsi(consoleLogSpy.calls[1].args[0]).match(
         /hash:([a-f0-9]{4})/,
       )[1];
       expect(hash1).to.equal(hash2);
@@ -448,10 +444,10 @@ describe('createDebugger', function () {
       debug1('m1');
       debug2('m2');
       expect(consoleLogSpy.callCount).to.equal(2);
-      const hash1 = stripAnsi(consoleLogSpy.getCall(0).args[0]).match(
+      const hash1 = stripAnsi(consoleLogSpy.calls[0].args[0]).match(
         /hash:([a-f0-9]{4})/,
       )[1];
-      const hash2 = stripAnsi(consoleLogSpy.getCall(1).args[0]).match(
+      const hash2 = stripAnsi(consoleLogSpy.calls[1].args[0]).match(
         /hash:([a-f0-9]{4})/,
       )[1];
       expect(hash1).to.not.equal(hash2);
@@ -461,7 +457,7 @@ describe('createDebugger', function () {
       process.env.DEBUG = 'hash';
       const debug = createDebugger('hash').withHash(8);
       debug('message');
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         /^hash:[a-f0-9]{8} message$/,
       );
     });
@@ -481,7 +477,7 @@ describe('createDebugger', function () {
       const debugHashed = debugBase.withHash();
       debugHashed('message');
       expect(consoleLogSpy.callCount).to.equal(1);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         /^envNs:[a-f0-9]{4} message$/,
       );
     });
@@ -496,12 +492,12 @@ describe('createDebugger', function () {
       debug1('message1');
       debug2('message2');
       expect(consoleLogSpy.callCount).to.equal(2);
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         new RegExp(
           '^offset\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}message1$',
         ),
       );
-      expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.match(
         new RegExp(
           '^offset\\s{' + (DEFAULT_OFFSET_STEP_SPACES * 2 + 1) + '}message2$',
         ),
@@ -528,7 +524,7 @@ describe('createDebugger', function () {
       debugOffset('message');
       expect(consoleLogSpy.callCount).to.equal(1);
       // предполагая, что offsetStep = '   '
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         new RegExp(
           '^envNs\\s{' + (DEFAULT_OFFSET_STEP_SPACES + 1) + '}message$',
         ),
@@ -546,7 +542,7 @@ describe('createDebugger', function () {
       debug('combined message');
       expect(consoleLogSpy.callCount).to.equal(1);
       // предполагая, что offsetStep = '   '
-      expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.match(
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
         new RegExp(
           '^app:svc:[a-f0-9]{5}\\s{' +
             (DEFAULT_OFFSET_STEP_SPACES + 1) +
@@ -586,8 +582,8 @@ describe('createDebugger', function () {
       // createColorizedDump выводит многострочный результат,
       // поэтому проверяем несколько вызовов console.log
       expect(consoleLogSpy.callCount).to.be.above(1);
-      const firstLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
-      const secondLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+      const firstLine = stripAnsi(consoleLogSpy.calls[0].args[0]);
+      const secondLine = stripAnsi(consoleLogSpy.calls[1].args[0]);
       expect(firstLine).to.equal('app {');
       // проверяем вторую строку с отступом,
       // который добавляет createColorizedDump
@@ -600,8 +596,8 @@ describe('createDebugger', function () {
       const data = {id: 123};
       debug.inspect('User data:', data);
       expect(consoleLogSpy.callCount).to.be.above(1);
-      const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
-      const dumpLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+      const descriptionLine = stripAnsi(consoleLogSpy.calls[0].args[0]);
+      const dumpLine = stripAnsi(consoleLogSpy.calls[1].args[0]);
       expect(descriptionLine).to.equal('app User data:');
       // проверка, что к дампу добавлен дополнительный отступ
       const expectedInternalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);
@@ -613,7 +609,7 @@ describe('createDebugger', function () {
         process.env.DEBUG = 'app:svc';
         const debug = createDebugger('app').withNs('svc');
         debug.inspect('Data:', {a: 1});
-        const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+        const descriptionLine = stripAnsi(consoleLogSpy.calls[0].args[0]);
         expect(descriptionLine).to.equal('app:svc Data:');
       });
 
@@ -621,7 +617,7 @@ describe('createDebugger', function () {
         process.env.DEBUG = 'app';
         const debug = createDebugger('app').withHash(6);
         debug.inspect({a: 1});
-        const firstLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
+        const firstLine = stripAnsi(consoleLogSpy.calls[0].args[0]);
         expect(firstLine).to.match(/^app:[a-f0-9]{6} \{$/);
       });
 
@@ -631,8 +627,8 @@ describe('createDebugger', function () {
         debug.inspect('My Data:', {a: 1});
         const offsetSpaces = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES * 2);
         const internalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);
-        const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
-        const dumpLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+        const descriptionLine = stripAnsi(consoleLogSpy.calls[0].args[0]);
+        const dumpLine = stripAnsi(consoleLogSpy.calls[1].args[0]);
         expect(descriptionLine).to.equal(`app${offsetSpaces} My Data:`);
         // проверка применения отступа к дампу (префикс + внутренний отступ)
         expect(dumpLine).to.equal(`app${offsetSpaces} ${internalOffset}{`);
@@ -645,12 +641,12 @@ describe('createDebugger', function () {
         const debugWithoutEnv = debugWithEnv.withoutEnvNs();
         // вызов inspect на исходном отладчике
         debugWithEnv.inspect('With env');
-        expect(stripAnsi(consoleLogSpy.getCall(0).args[0])).to.equal(
+        expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
           "myApp:api 'With env'",
         );
         // вызов на новом отладчике
         debugWithoutEnv.inspect('Without env');
-        expect(stripAnsi(consoleLogSpy.getCall(1).args[0])).to.equal(
+        expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.equal(
           "api 'Without env'",
         );
       });
@@ -666,8 +662,8 @@ describe('createDebugger', function () {
         debug.inspect('User List:', [{id: 1}, {id: 2}]);
         const offsetSpaces = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES * 1);
         const internalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);
-        const descriptionLine = stripAnsi(consoleLogSpy.getCall(0).args[0]);
-        const dumpLine = stripAnsi(consoleLogSpy.getCall(1).args[0]);
+        const descriptionLine = stripAnsi(consoleLogSpy.calls[0].args[0]);
+        const dumpLine = stripAnsi(consoleLogSpy.calls[1].args[0]);
         // проверка отсутствия DEBUGGER_NAMESPACE
         expect(descriptionLine).to.not.contain('myApp');
         // проверка всей строки с помощью регулярного выражения
