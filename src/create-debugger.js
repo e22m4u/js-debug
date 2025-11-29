@@ -108,7 +108,7 @@ function matchPattern(pattern, input) {
  * Create debugger.
  *
  * @param {string} namespaceOrOptions
- * @param {string} namespaceSegments
+ * @param {string[]} namespaceSegments
  * @returns {Function}
  */
 export function createDebugger(

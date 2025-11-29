@@ -20,6 +20,12 @@ describe('createDebugger', function () {
     originalLocalStorage = global.localStorage;
     global.localStorage = {
       _store: {},
+      get length() {
+        return Object.keys(this._store).length;
+      },
+      key(num) {
+        return Object.keys(this._store)[num] || null;
+      },
       getItem(key) {
         return this._store[key] || null;
       },
@@ -262,6 +268,7 @@ describe('createDebugger', function () {
     });
 
     it('should throw error if createDebugger is called with invalid subsequent segment type', function () {
+      // @ts-ignore
       expect(() => createDebugger('app', 'valid', 123)).to.throw(
         /Namespace segment must be a non-empty String/,
       );
@@ -278,6 +285,7 @@ describe('createDebugger', function () {
 
     it('should throw error if withNs is called with non-string', function () {
       const debug = createDebugger('app');
+      // @ts-ignore
       expect(() => debug.withNs(123)).to.throw(
         /Debugger namespace must be a non-empty String/,
       );
@@ -467,6 +475,7 @@ describe('createDebugger', function () {
       expect(() => debug.withHash(0)).to.throw(/must be a positive Number/);
       expect(() => debug.withHash(-1)).to.throw(/must be a positive Number/);
       expect(() => debug.withHash(null)).to.throw(/must be a positive Number/);
+      // @ts-ignore
       expect(() => debug.withHash('abc')).to.throw(/must be a positive Number/);
     });
 
@@ -511,6 +520,7 @@ describe('createDebugger', function () {
       expect(() => debug.withOffset(null)).to.throw(
         /must be a positive Number/,
       );
+      // @ts-ignore
       expect(() => debug.withOffset('abc')).to.throw(
         /must be a positive Number/,
       );
@@ -554,12 +564,15 @@ describe('createDebugger', function () {
 
   describe('creation error', function () {
     it('should throw error if createDebugger is called with invalid type', function () {
+      // @ts-ignore
       expect(() => createDebugger(123)).to.throw(
         /must be a String or an Object/,
       );
+      // @ts-ignore
       expect(() => createDebugger(true)).to.throw(
         /must be a String or an Object/,
       );
+      // @ts-ignore
       expect(() => createDebugger([])).to.throw(
         /must be a String or an Object/,
       );

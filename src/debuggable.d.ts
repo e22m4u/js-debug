@@ -15,6 +15,11 @@ export type DebuggableOptions = {
  */
 export class Debuggable {
   /**
+   * Instantiation message.
+   */
+  static INSTANTIATION_MESSAGE: string;
+
+  /**
    * Debug.
    */
   debug: Debugger;

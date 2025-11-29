@@ -65,7 +65,7 @@ var _Debuggable = class _Debuggable {
   /**
    * Debug.
    *
-   * @type {Function}
+   * @type {*}
    */
   debug;
   /**
@@ -109,7 +109,7 @@ var _Debuggable = class _Debuggable {
 };
 __name(_Debuggable, "Debuggable");
 /**
- * Instantiation message;
+ * Instantiation message.
  *
  * @type {string}
  */

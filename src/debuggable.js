@@ -14,7 +14,7 @@ import {createDebugger} from '@e22m4u/js-debug';
  */
 export class Debuggable {
   /**
-   * Instantiation message;
+   * Instantiation message.
    *
    * @type {string}
    */
@@ -23,7 +23,7 @@ export class Debuggable {
   /**
    * Debug.
    *
-   * @type {Function}
+   * @type {*}
    */
   debug;
 
