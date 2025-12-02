@@ -1,8 +1,7 @@
 import {expect} from 'chai';
 import {createSpy} from '@e22m4u/js-spy';
 import {Debuggable} from './debuggable.js';
-import {stripAnsi} from './utils/index.js';
-import {escapeRegexp} from './utils/index.js';
+import {stripAnsi, escapeRegexp} from './utils/index.js';
 
 describe('Debuggable', function () {
   let consoleLogSpy;
