@@ -1,11 +1,12 @@
 import {toCamelCase} from './utils/index.js';
-import {createDebugger} from './create-debugger.js';
+import {createDebugger} from '@e22m4u/js-debug';
 
 /**
- * @typedef {object} DebuggableOptions
- * @property {string} [namespace]
- * @property {boolean} [noEnvironmentNamespace]
- * @property {boolean} [noInstantiationMessage]
+ * @typedef {{
+ *   namespace?: string,
+ *   noEnvironmentNamespace?: boolean,
+ *   noInstantiationMessage?: boolean,
+ * }} DebuggableOptions
  */
 
 /**

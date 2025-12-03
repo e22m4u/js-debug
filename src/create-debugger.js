@@ -1,6 +1,8 @@
-import {Errorf, format} from '@e22m4u/js-format';
+import {Errorf} from '@e22m4u/js-format';
+import {format} from '@e22m4u/js-format';
+import {isNonArrayObject} from './utils/index.js';
+import {generateRandomHex} from './utils/index.js';
 import {createColorizedDump} from './create-colorized-dump.js';
-import {isNonArrayObject, generateRandomHex} from './utils/index.js';
 
 /**
  * Доступные цвета.
@@ -224,11 +226,6 @@ export function createDebugger(
   };
   // формирование функции вывода
   // сообщений отладки
-  /**
-   * @param {*} messageOrData
-   * @param  {...*} args
-   * @returns {undefined}
-   */
   function debugFn(messageOrData, ...args) {
     if (!isDebuggerEnabled()) return;
     const prefix = getPrefix();
