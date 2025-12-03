@@ -1,5 +1,5 @@
 import {toCamelCase} from './utils/index.js';
-import {createDebugger} from '@e22m4u/js-debug';
+import {createDebugger} from './create-debugger.js';
 
 /**
  * @typedef {{
@@ -49,7 +49,7 @@ export class Debuggable {
   /**
    * Constructor.
    *
-   * @param {DebuggableOptions|undefined} options
+   * @param {DebuggableOptions} [options]
    */
   constructor(options = undefined) {
     const className = toCamelCase(this.constructor.name);

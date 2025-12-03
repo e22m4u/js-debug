@@ -1,7 +1,8 @@
 /**
  * To camel case.
  *
- * @param input
+ * @param {string} input
+ * @returns {string}
  */
 export function toCamelCase(input) {
   return input

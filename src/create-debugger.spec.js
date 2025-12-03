@@ -1,8 +1,7 @@
 import {expect} from 'chai';
 import {createSpy} from '@e22m4u/js-spy';
 import {stripAnsi} from './utils/strip-ansi.js';
-import {createDebugger} from './create-debugger.js';
-import {DEFAULT_OFFSET_STEP_SPACES} from './create-debugger.js';
+import {createDebugger, DEFAULT_OFFSET_STEP_SPACES} from './create-debugger.js';
 
 describe('createDebugger', function () {
   let consoleLogSpy;
