@@ -255,18 +255,18 @@ debugWo1.inspect('Participant contacts found:', contact);
 
 ```bash
 # включить конкретное пространство имен
-DEBUG=myApp node your_script.js
+DEBUG=myApp node your-script.js
 
 # включить все пространства имен, начинающиеся с 'myApp:'
-DEBUG=myApp:* node your_script.js
+DEBUG=myApp:* node your-script.js
 
 # включить несколько пространств имен через запятую
-DEBUG=myApp:service,lib:utils node your_script.js
+DEBUG=myApp:service,lib:utils node your-script.js
 # если используете пробелы, нужны кавычки
-DEBUG="myApp:service lib:utils" node your_script.js
+DEBUG="myApp:service lib:utils" node your-script.js
 
 # включить ВСЕ пространства имен
-DEBUG=* node your_script.js
+DEBUG=* node your-script.js
 ```
 
 ### Браузер: localStorage.debug
