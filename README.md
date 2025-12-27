@@ -201,8 +201,8 @@ debug2('Hello world');
 debug3('Hello world');
 debug4('Hello world');
 // Hello world
-//    Hello world
-//        Hello world
+//   Hello world
+//     Hello world
 // myApp       Hello world
 ```
 
