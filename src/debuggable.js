@@ -66,11 +66,13 @@ export class Debuggable {
     // опция "noEnvironmentNamespace" отключает пространство имен
     // из переменной окружения DEBUGGER_NAMESPACE
     const noEnvironmentNamespace = Boolean(options.noEnvironmentNamespace);
-    if (noEnvironmentNamespace) this.debug = this.debug.withoutEnvNs();
-
+    if (noEnvironmentNamespace) {
+      this.debug = this.debug.withoutEnvNs();
+    }
     this.ctorDebug = this.debug.withNs('constructor').withHash();
     const noInstantiationMessage = Boolean(options.noInstantiationMessage);
-    if (!noInstantiationMessage)
+    if (!noInstantiationMessage) {
       this.ctorDebug(Debuggable.INSTANTIATION_MESSAGE);
+    }
   }
 }

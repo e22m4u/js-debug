@@ -29,12 +29,13 @@ export const DEFAULT_OFFSET_STEP_SPACES = 2;
  * @returns {number}
  */
 function pickColorCode(input) {
-  if (typeof input !== 'string')
+  if (typeof input !== 'string') {
     throw new Errorf(
       'The parameter "input" of the function pickColorCode ' +
         'must be a String, but %v given.',
       input,
     );
+  }
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     hash = (hash << 5) - hash + input.charCodeAt(i);
@@ -52,18 +53,20 @@ function pickColorCode(input) {
  * @returns {string}
  */
 function wrapStringByColorCode(input, color) {
-  if (typeof input !== 'string')
+  if (typeof input !== 'string') {
     throw new Errorf(
       'The parameter "input" of the function wrapStringByColorCode ' +
         'must be a String, but %v given.',
       input,
     );
-  if (typeof color !== 'number')
+  }
+  if (typeof color !== 'number') {
     throw new Errorf(
       'The parameter "color" of the function wrapStringByColorCode ' +
         'must be a Number, but %v given.',
       color,
     );
+  }
   const colorCode = '\u001B[3' + (Number(color) < 8 ? color : '8;5;' + color);
   return `${colorCode};1m${input}\u001B[0m`;
 }
@@ -85,18 +88,20 @@ function wrapStringByColorCode(input, color) {
  * @returns {boolean}
  */
 function matchPattern(pattern, input) {
-  if (typeof pattern !== 'string')
+  if (typeof pattern !== 'string') {
     throw new Errorf(
       'The parameter "pattern" of the function matchPattern ' +
         'must be a String, but %v given.',
       pattern,
     );
-  if (typeof input !== 'string')
+  }
+  if (typeof input !== 'string') {
     throw new Errorf(
       'The parameter "input" of the function matchPattern ' +
         'must be a String, but %v given.',
       input,
     );
+  }
   const regexpStr = pattern.replace(/\*/g, '.*?');
   const regexp = new RegExp('^' + regexpStr + '$');
   return regexp.test(input);
@@ -162,17 +167,19 @@ export function createDebugger(
     }
     // если первый аргумент содержит значение,
     // то оно используется как пространство имен
-    if (typeof namespaceOrOptions === 'string')
+    if (typeof namespaceOrOptions === 'string') {
       state.nsSegments.push(namespaceOrOptions);
+    }
   }
   // проверка типа дополнительных сегментов пространства
   // имен, и добавление их в общий набор сегментов
   namespaceSegments.forEach(segment => {
-    if (!segment || typeof segment !== 'string')
+    if (!segment || typeof segment !== 'string') {
       throw new Errorf(
         'Namespace segment must be a non-empty String, but %v given.',
         segment,
       );
+    }
     state.nsSegments.push(segment);
   });
   // если переменная окружения DEBUG содержит
@@ -196,9 +203,13 @@ export function createDebugger(
       state.delimiter,
     );
     const patterns = state.pattern.split(/[\s,]+/).filter(p => p.length > 0);
-    if (patterns.length === 0 && state.pattern !== '*') return false;
+    if (patterns.length === 0 && state.pattern !== '*') {
+      return false;
+    }
     for (const singlePattern of patterns) {
-      if (matchPattern(singlePattern, nsStr)) return true;
+      if (matchPattern(singlePattern, nsStr)) {
+        return true;
+      }
     }
     return false;
   };
@@ -216,17 +227,23 @@ export function createDebugger(
       const isLast = tokens.length - 1 === index;
       const tokenColor = pickColorCode(token);
       acc += wrapStringByColorCode(token, tokenColor);
-      if (!isLast) acc += state.delimiter;
+      if (!isLast) {
+        acc += state.delimiter;
+      }
       return acc;
     }, '');
-    if (state.offsetSize > 0) res += state.offsetStep.repeat(state.offsetSize);
+    if (state.offsetSize > 0) {
+      res += state.offsetStep.repeat(state.offsetSize);
+    }
     return res;
   };
   // формирование функции вывода
   // сообщений отладки
   // eslint-disable-next-line jsdoc/require-jsdoc
   function debugFn(messageOrData, ...args) {
-    if (!isDebuggerEnabled()) return;
+    if (!isDebuggerEnabled()) {
+      return;
+    }
     const prefix = getPrefix();
     const multiString = format(messageOrData, ...args);
     const rows = multiString.split('\n');
@@ -242,11 +259,12 @@ export function createDebugger(
   debugFn.withNs = function (namespace, ...args) {
     const stateCopy = JSON.parse(JSON.stringify(state));
     [namespace, ...args].forEach(ns => {
-      if (!ns || typeof ns !== 'string')
+      if (!ns || typeof ns !== 'string') {
         throw new Errorf(
           'Debugger namespace must be a non-empty String, but %v given.',
           ns,
         );
+      }
       stateCopy.nsSegments.push(ns);
     });
     return createDebugger(stateCopy);
@@ -289,7 +307,9 @@ export function createDebugger(
   // использовано для дампа, а если передано два аргумента, то первый
   // будет являться описанием для второго
   debugFn.inspect = function (valueOrDesc, ...args) {
-    if (!isDebuggerEnabled()) return;
+    if (!isDebuggerEnabled()) {
+      return;
+    }
     const prefix = getPrefix();
     let multiString = '';
     // если первый аргумент является строкой, при условии наличия
