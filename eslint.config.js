@@ -28,7 +28,7 @@ export default [{
     ...eslintMochaPlugin.configs.recommended.rules,
     ...eslintChaiExpectPlugin.configs['recommended-flat'].rules,
     ...eslintJsdocPlugin.configs['flat/recommended-error'].rules,
-    "curly": "error",
+    'curly': 'error',
     'no-duplicate-imports': 'error',
     'import/export': 0,
     'jsdoc/reject-any-type': 0,
