@@ -11,10 +11,10 @@
     "debugger",
     "interpolation"
   ],
-  "homepage": "https://gitrepos.ru/e22m4u/js-debug",
+  "homepage": "https://gitverse.ru/e22m4u/js-debug",
   "repository": {
     "type": "git",
-    "url": "git+https://gitrepos.ru/e22m4u/js-debug.git"
+    "url": "git+https://gitverse.ru/e22m4u/js-debug.git"
   },
   "type": "module",
   "types": "./src/index.d.ts",
