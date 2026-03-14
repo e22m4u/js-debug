@@ -114,7 +114,7 @@ debug4('Hello world');
 // myApp:myService Hello world
 ```
 
-Определение глобального пространства имен в переменной окружения.
+Определение глобального пространства имен в переменных окружения.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -126,7 +126,19 @@ debug('Hello world');
 // myApp Hello world
 ```
 
-Отключение глобального пространства имен из переменной окружения.
+Определение глобального пространства имен в локальном хранилище (браузер).
+
+```js
+localStorage.setItem('debuggerNamespace', 'myApp');
+// или
+localStorage.debuggerNamespace = 'myApp';
+
+const debug = createDebugger();
+debug('Hello world');
+// myApp Hello world
+```
+
+Отключение пространства имен из переменной окружения и локального хранилища.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -134,7 +146,7 @@ import {createDebugger} from '@e22m4u/js-debug';
 process.env['DEBUGGER_NAMESPACE'] = 'myApp';
 
 const debug1 = createDebugger();
-const debug2 = debug1.withoutEnvNs();
+const debug2 = debug1.withoutGlobalNs();
 debug1('Hello world');
 debug2('Hello world');
 // myApp Hello world
@@ -268,8 +280,8 @@ DEBUG=* node your-script.js
 
 ### Браузер: localStorage.debug
 
-В веб-браузерах для управления выводом используется ключ debug в localStorage.
-Вы можете установить его значение через консоль разработчика.
+В веб-браузерах для управления выводом используется ключ `debug` локального
+хранилища. Значение данного ключа можно установить через консоль разработчика.
 
 ```js
 // включить конкретное пространство имен
@@ -409,7 +421,7 @@ calculator.multiply(4, 8);
 Первый аргумент класса `Debuggable` принимает объект со следующими свойствами.
 
 - `namespace?: string` - префиксное пространство имен;
-- `noEnvironmentNamespace?: boolean` - игнорировать переменную `DEBUGGER_NAMESPACE`;
+- `noGlobalNamespace?: boolean` - игнорировать глобальные пространства имен;
 - `noInstantiationMessage?: boolean` - не выводить сообщение о создании экземпляра;
 
 #### DebuggableOptions.namespace
@@ -442,21 +454,30 @@ calculator.multiply(4, 8);
 // myApp:calculator:multiply:4d8w Result 32.
 ```
 
-#### DebuggableOptions.noEnvironmentNamespace
+#### DebuggableOptions.noGlobalNamespace
 
-Значение `true` опции `noEnvironmentNamespace` позволяет игнорировать
-переменную окружения `DEBUGGER_NAMESPACE`, устанавливающую префиксное
-пространство имен.
+Значение `true` опции `noGlobalNamespace` позволяет игнорировать глобальные
+пространства имен из переменных окружения (на сервере) и локального хранилища
+(в браузере). Ниже показан пример использования данной опции.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
 
-process.env['DEBUGGER_NAMESPACE'] = 'myApp'; // <=
+// определение шаблона вывода сообщений в консоль,
+// символ "*" для вывода всех сообщений
 process.env['DEBUG'] = '*';
+
+// установка глобального пространства
+// имен для всего приложения
+process.env['DEBUGGER_NAMESPACE'] = 'myApp';
 
 class Calculator extends Debuggable {
   constructor() {
-    super({noEnvironmentNamespace: true}); // <=
+    super({
+      // переменная DEBUGGER_NAMESPACE будет
+      // проигнорирована для данного экземпляра
+      noGlobalNamespace: true,
+    });
   }
 
   multiply(a, b) {

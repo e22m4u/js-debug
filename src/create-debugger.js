@@ -135,8 +135,8 @@ export function createDebugger(
   // для хранения текущих настроек
   const withCustomState = isNonArrayObject(namespaceOrOptions);
   const state = withCustomState ? namespaceOrOptions : {};
-  state.envNsSegments = Array.isArray(state.envNsSegments)
-    ? state.envNsSegments
+  state.globalNsSegments = Array.isArray(state.globalNsSegments)
+    ? state.globalNsSegments
     : [];
   state.nsSegments = Array.isArray(state.nsSegments) ? state.nsSegments : [];
   state.pattern = typeof state.pattern === 'string' ? state.pattern : '';
@@ -163,7 +163,16 @@ export function createDebugger(
       process.env &&
       process.env['DEBUGGER_NAMESPACE']
     ) {
-      state.envNsSegments.push(process.env.DEBUGGER_NAMESPACE);
+      state.globalNsSegments.push(process.env.DEBUGGER_NAMESPACE);
+    }
+    // так как модуль изоморфный (работает в браузере и на сервере),
+    // для браузера предусмотрен ключ "debuggerNamespace" локального
+    // хранилища, который используется как переменная DEBUGGER_NAMESPACE
+    if (
+      typeof localStorage !== 'undefined' &&
+      localStorage.getItem('debuggerNamespace')
+    ) {
+      state.globalNsSegments.push(localStorage.getItem('debuggerNamespace'));
     }
     // если первый аргумент содержит значение,
     // то оно используется как пространство имен
@@ -199,7 +208,7 @@ export function createDebugger(
   // формирование функции для проверки
   // активности текущего отладчика
   const isDebuggerEnabled = () => {
-    const nsStr = [...state.envNsSegments, ...state.nsSegments].join(
+    const nsStr = [...state.globalNsSegments, ...state.nsSegments].join(
       state.delimiter,
     );
     const patterns = state.pattern.split(/[\s,]+/).filter(p => p.length > 0);
@@ -217,7 +226,7 @@ export function createDebugger(
   // для сообщений отладки
   const getPrefix = () => {
     let tokens = [];
-    [...state.envNsSegments, ...state.nsSegments, state.hash]
+    [...state.globalNsSegments, ...state.nsSegments, state.hash]
       .filter(Boolean)
       .forEach(token => {
         const extractedTokens = token.split(state.delimiter).filter(Boolean);
@@ -295,12 +304,12 @@ export function createDebugger(
     stateCopy.offsetSize = offsetSize;
     return createDebugger(stateCopy);
   };
-  // создание новой функции логирования
-  // без пространства имен из переменной
-  // окружения DEBUGGER_NAMESPACE
-  debugFn.withoutEnvNs = function () {
+  // создание новой функции логирования без глобального пространства
+  // имен, полученного из переменной окружения DEBUGGER_NAMESPACE или
+  // по ключу "debuggerNamespace" локального хранилища браузера
+  debugFn.withoutGlobalNs = function () {
     const stateCopy = JSON.parse(JSON.stringify(state));
-    stateCopy.envNsSegments = [];
+    stateCopy.globalNsSegments = [];
     return createDebugger(stateCopy);
   };
   // определение метода inspect, где значение первого аргумента будет

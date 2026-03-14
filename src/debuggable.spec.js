@@ -7,6 +7,7 @@ describe('Debuggable', function () {
   let consoleLogSpy;
   let originalDebugEnv;
   let originalDebuggerNamespaceEnv;
+  let originalLocalStorage;
 
   beforeEach(function () {
     // шпионим за console.log перед каждым тестом
@@ -17,6 +18,33 @@ describe('Debuggable', function () {
     // сбрасываем переменные перед тестом
     delete process.env.DEBUG;
     delete process.env.DEBUGGER_NAMESPACE;
+    // базовая симуляция localStorage для тестов
+    originalLocalStorage = global.localStorage;
+    global.localStorage = {
+      _store: {},
+      get length() {
+        return Object.keys(this._store).length;
+      },
+      key(num) {
+        return Object.keys(this._store)[num] || null;
+      },
+      getItem(key) {
+        return this._store[key] || null;
+      },
+      setItem(key, value) {
+        this._store[key] = String(value);
+      },
+      removeItem(key) {
+        delete this._store[key];
+      },
+      clear() {
+        this._store = {};
+      },
+    };
+    // сбрасываем переменные перед тестом
+    delete process.env.DEBUG;
+    delete process.env.DEBUGGER_NAMESPACE;
+    global.localStorage.clear();
   });
 
   afterEach(function () {
@@ -33,6 +61,8 @@ describe('Debuggable', function () {
     } else {
       process.env.DEBUGGER_NAMESPACE = originalDebuggerNamespaceEnv;
     }
+    // восстанавливаем localStorage
+    global.localStorage = originalLocalStorage;
   });
 
   it('has the debug method', function () {
@@ -51,9 +81,20 @@ describe('Debuggable', function () {
       );
     });
 
-    it('should use DEBUGGER_NAMESPACE environment variable', function () {
+    it('should use DEBUGGER_NAMESPACE variable as a global namespace', function () {
       process.env.DEBUGGER_NAMESPACE = 'myApp';
       process.env.DEBUG = '*';
+      new Debuggable();
+      expect(consoleLogSpy.callCount).to.equal(1);
+      const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
+        new RegExp(`^myApp:debuggable:constructor:[a-f0-9]{4} ${msg}$`),
+      );
+    });
+
+    it('should use localStorage.debuggerNamespace as a global namespace', function () {
+      process.env.DEBUG = '*';
+      global.localStorage.setItem('debuggerNamespace', 'myApp');
       new Debuggable();
       expect(consoleLogSpy.callCount).to.equal(1);
       const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
@@ -85,11 +126,11 @@ describe('Debuggable', function () {
       });
     });
 
-    describe('"noEnvironmentNamespace" option', function () {
-      it('should use DEBUGGER_NAMESPACE when the option "noEnvironmentNamespace" is false', function () {
+    describe('"noGlobalNamespace" option', function () {
+      it('should use DEBUGGER_NAMESPACE when the option "noGlobalNamespace" is false', function () {
         process.env.DEBUGGER_NAMESPACE = 'myApp';
         process.env.DEBUG = '*';
-        new Debuggable({noEnvironmentNamespace: false});
+        new Debuggable({noGlobalNamespace: false});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
         expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
@@ -97,10 +138,32 @@ describe('Debuggable', function () {
         );
       });
 
-      it('should skip DEBUGGER_NAMESPACE when the option "noEnvironmentNamespace" is true', function () {
+      it('should ignore DEBUGGER_NAMESPACE when the option "noGlobalNamespace" is true', function () {
         process.env.DEBUGGER_NAMESPACE = 'myApp';
         process.env.DEBUG = '*';
-        new Debuggable({noEnvironmentNamespace: true});
+        new Debuggable({noGlobalNamespace: true});
+        expect(consoleLogSpy.callCount).to.equal(1);
+        const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
+        expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
+          new RegExp(`^debuggable:constructor:[a-f0-9]{4} ${msg}$`),
+        );
+      });
+
+      it('should use localStorage.debuggerNamespace when the option "noGlobalNamespace" is false', function () {
+        global.localStorage.setItem('debuggerNamespace', 'myApp');
+        process.env.DEBUG = '*';
+        new Debuggable({noGlobalNamespace: false});
+        expect(consoleLogSpy.callCount).to.equal(1);
+        const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
+        expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(
+          new RegExp(`^myApp:debuggable:constructor:[a-f0-9]{4} ${msg}$`),
+        );
+      });
+
+      it('should ignore localStorage.debuggerNamespace when the option "noGlobalNamespace" is true', function () {
+        global.localStorage.setItem('debuggerNamespace', 'myApp');
+        process.env.DEBUG = '*';
+        new Debuggable({noGlobalNamespace: true});
         expect(consoleLogSpy.callCount).to.equal(1);
         const msg = escapeRegexp(Debuggable.INSTANTIATION_MESSAGE);
         expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.match(

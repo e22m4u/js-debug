@@ -377,7 +377,7 @@ describe('createDebugger', function () {
       );
     });
 
-    it('should use localStorage pattern if DEBUG env is not set', function () {
+    it('should use localStorage.debug pattern if DEBUG env is not set', function () {
       global.localStorage.setItem('debug', 'local:*');
       const debugLocal = createDebugger('local:test');
       const debugOther = createDebugger('other:test');
@@ -389,7 +389,7 @@ describe('createDebugger', function () {
       );
     });
 
-    it('should prioritize DEBUG env over localStorage', function () {
+    it('should prioritize DEBUG env over localStorage.debug', function () {
       process.env.DEBUG = 'env:*';
       global.localStorage.setItem('debug', 'local:*');
       const debugEnv = createDebugger('env:test');
@@ -402,11 +402,49 @@ describe('createDebugger', function () {
       );
     });
 
-    it('should exclude namespace of DEBUGGER_NAMESPACE in withoutEnvNs()', function () {
+    it('should exclude namespace of DEBUGGER_NAMESPACE in withoutGlobalNs()', function () {
       process.env.DEBUG = '*';
       process.env.DEBUGGER_NAMESPACE = 'myApp';
       const debug1 = createDebugger();
-      const debug2 = debug1.withoutEnvNs();
+      const debug2 = debug1.withoutGlobalNs();
+      debug1('message 1');
+      expect(consoleLogSpy.callCount).to.equal(1);
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
+        'myApp message 1',
+      );
+      debug2('message 2');
+      expect(consoleLogSpy.callCount).to.equal(2);
+      expect(stripAnsi(consoleLogSpy.calls[1].args[0])).to.equal('message 2');
+    });
+
+    it('should use localStorage.debuggerNamespace as a global namespace', function () {
+      process.env.DEBUG = '*';
+      global.localStorage.setItem('debuggerNamespace', 'myApp');
+      const debug = createDebugger('test');
+      debug('message');
+      expect(consoleLogSpy.callCount).to.equal(1);
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
+        'myApp:test message',
+      );
+    });
+
+    it('should use DEBUGGER_NAMESPACE and localStorage.debuggerNamespace in correct order', function () {
+      process.env.DEBUG = '*';
+      process.env.DEBUGGER_NAMESPACE = 'foo';
+      global.localStorage.setItem('debuggerNamespace', 'bar');
+      const debug = createDebugger('test');
+      debug('message');
+      expect(consoleLogSpy.callCount).to.equal(1);
+      expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
+        'foo:bar:test message',
+      );
+    });
+
+    it('should exclude namespace of localStorage.debuggerNamespace in withoutGlobalNs()', function () {
+      process.env.DEBUG = '*';
+      global.localStorage.setItem('debuggerNamespace', 'myApp');
+      const debug1 = createDebugger();
+      const debug2 = debug1.withoutGlobalNs();
       debug1('message 1');
       expect(consoleLogSpy.callCount).to.equal(1);
       expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
@@ -646,11 +684,11 @@ describe('createDebugger', function () {
         expect(dumpLine).to.equal(`app${offsetSpaces} ${internalOffset}{`);
       });
 
-      it('should respect withoutEnvNs() in inspect output', function () {
+      it('should respect withoutGlobalNs() in inspect output', function () {
         process.env.DEBUG = '*';
         process.env.DEBUGGER_NAMESPACE = 'myApp';
         const debugWithEnv = createDebugger('api');
-        const debugWithoutEnv = debugWithEnv.withoutEnvNs();
+        const debugWithoutEnv = debugWithEnv.withoutGlobalNs();
         // вызов inspect на исходном отладчике
         debugWithEnv.inspect('With env');
         expect(stripAnsi(consoleLogSpy.calls[0].args[0])).to.equal(
@@ -670,7 +708,7 @@ describe('createDebugger', function () {
           .withNs('users')
           .withHash(4)
           .withOffset(1)
-          .withoutEnvNs();
+          .withoutGlobalNs();
         debug.inspect('User List:', [{id: 1}, {id: 2}]);
         const offsetSpaces = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES * 1);
         const internalOffset = ' '.repeat(DEFAULT_OFFSET_STEP_SPACES);

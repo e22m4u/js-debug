@@ -4,7 +4,7 @@ import {createDebugger} from './create-debugger.js';
 /**
  * @typedef {{
  *   namespace?: string,
- *   noEnvironmentNamespace?: boolean,
+ *   noGlobalNamespace?: boolean,
  *   noInstantiationMessage?: boolean,
  * }} DebuggableOptions
  */
@@ -63,11 +63,12 @@ export class Debuggable {
     } else {
       this.debug = createDebugger(className);
     }
-    // опция "noEnvironmentNamespace" отключает пространство имен
-    // из переменной окружения DEBUGGER_NAMESPACE
-    const noEnvironmentNamespace = Boolean(options.noEnvironmentNamespace);
-    if (noEnvironmentNamespace) {
-      this.debug = this.debug.withoutEnvNs();
+    // опция "noGlobalNamespace" отключает глобальные пространства
+    // имен, полученные из переменной окружения DEBUGGER_NAMESPACE
+    // и по ключу "debuggerNamespace" локального хранилища
+    const noGlobalNamespace = Boolean(options.noGlobalNamespace);
+    if (noGlobalNamespace) {
+      this.debug = this.debug.withoutGlobalNs();
     }
     this.ctorDebug = this.debug.withNs('constructor').withHash();
     const noInstantiationMessage = Boolean(options.noInstantiationMessage);

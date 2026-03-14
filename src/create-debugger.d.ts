@@ -9,10 +9,11 @@ export const DEFAULT_OFFSET_STEP_SPACES: number;
  */
 export type DebuggerState = {
   /**
-   * Массив строк, содержащий сегменты пространства имен,
-   * полученные из переменной окружения DEBUGGER_NAMESPACE.
+   * Массив строк, содержащий сегменты глобальных пространств имен,
+   * полученные из переменной окружения DEBUGGER_NAMESPACE
+   * и по ключу "debuggerNamespace" из локального хранилища.
    */
-  envNsSegments: string[];
+  globalNsSegments: string[];
   /**
    * Массив строк, содержащий сегменты пространства имен,
    * переданные в качестве аргументов при создании отладчика.
@@ -21,7 +22,7 @@ export type DebuggerState = {
   /**
    * Строка, используемая в качестве шаблона для определения,
    * активен ли данный отладчик. Она получается из переменной
-   * окружения DEBUG или из localStorage.
+   * окружения DEBUG или из localStorage.debug.
    */
   pattern: string;
   /**
@@ -103,12 +104,13 @@ export interface Debugger {
   withOffset(offsetSize: number): Debugger;
 
   /**
-   * Создание нового экземпляра отладчика без пространства имен
-   * из переменной окружения DEBUGGER_NAMESPACE.
+   * Создание нового экземпляра отладчика, игнорируя глобальные пространства
+   * имен, полученные из переменной окружения DEBUGGER_NAMESPACE (на сервере)
+   * и по ключу "debuggerNamespace" локального хранилища (в браузере).
    *
    * @returns Новый экземпляр Debugger.
    */
-  withoutEnvNs(): Debugger;
+  withoutGlobalNs(): Debugger;
 
   /**
    * Вывод дампа первого аргумента. Если передано два аргумента,

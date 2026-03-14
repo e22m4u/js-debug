@@ -6,7 +6,7 @@ import {Debugger} from './create-debugger.js';
  */
 export type DebuggableOptions = {
   namespace?: string,
-  noEnvironmentNamespace?: boolean,
+  noGlobalNamespace?: boolean,
   noInstantiationMessage?: boolean,
 }
 
