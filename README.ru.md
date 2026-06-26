@@ -1,25 +1,25 @@
 ## @e22m4u/js-debug
 
-English | [Russian](./README.ru.md)
+[English](./README.md) | Russian
 
-A debug logging utility for JavaScript.
+Утилита вывода сообщений отладки для JavaScript.
+      
+## Содержание
 
-## Contents
+* [Установка](#установка)
+* [Использование](#использование)
+* [Управление выводом](#управление-выводом)
+* [Класс Debuggable](#класс-debuggable)
+* [Тесты](#тесты)
+* [Лицензия](#лицензия)
 
-* [Installation](#installation)
-* [Usage](#usage)
-* [Output Control](#output-control)
-* [Debuggable Class](#debuggable-class)
-* [Tests](#tests)
-* [License](#license)
-
-## Installation
+## Установка
 
 ```bash
 npm install @e22m4u/js-debug
 ```
 
-The module supports ESM and CommonJS standards.
+Поддержка ESM и CommonJS стандартов.
 
 *ESM*
 
@@ -33,9 +33,9 @@ import {createDebugger} from '@e22m4u/js-debug';
 const {createDebugger} = require('@e22m4u/js-debug');
 ```
 
-## Usage
+## Использование
 
-String interpolation (see specifiers in [@e22m4u/js-format](https://www.npmjs.com/package/@e22m4u/js-format)).
+Интерполяция строк (см. спецификаторы [@e22m4u/js-format](https://www.npmjs.com/package/@e22m4u/js-format)).
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -47,13 +47,13 @@ debug('Got values %l.', ['foo', 10, true]);
 // Got values "foo", 10, true.
 ```
 
-Value dumping.
+Дамп значений.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-// (!) the inspect method is used
+// (!) используется метод inspect
 debug.inspect({
   email: 'john.doe@example.com',
   phone: {
@@ -70,14 +70,14 @@ debug.inspect({
 // }
 ```
 
-A header message above the dump.
+Заголовочное сообщение над дампом.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
 const debug = createDebugger();
-// the header message is passed
-// as the first argument to the inspect method
+// заголовочное сообщение передается
+// в метод inspect первым аргументом
 debug.inspect('Order details:', {
   orderId: 988,
   date: '2023-10-27',
@@ -92,19 +92,19 @@ debug.inspect('Order details:', {
 //   }
 ```
 
-Namespace definition.
+Определение пространства имен.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
-// calling createDebugger() without arguments creates
-// a debugger with an empty namespace
+// вызов createDebugger() без аргументов создает
+// отладчик с пустым пространством имен
 const debug1 = createDebugger();
 debug1('Hello world');
 // Hello world
 
-// the namespace can be passed as the first
-// argument of the factory, as shown below
+// пространство имен можно передать в первом
+// аргументе фабрики, как это показано ниже
 const debug2 = createDebugger('myApp');
 const debug3 = createDebugger('myApp', 'myService');
 const debug4 = createDebugger('myApp:myService');
@@ -116,7 +116,7 @@ debug4('Hello world');
 // myApp:myService Hello world
 ```
 
-Definition of a global namespace in environment variables.
+Определение глобального пространства имен в переменных окружения.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -128,11 +128,11 @@ debug('Hello world');
 // myApp Hello world
 ```
 
-Definition of a global namespace in local storage (browser).
+Определение глобального пространства имен в локальном хранилище (браузер).
 
 ```js
 localStorage.setItem('debuggerNamespace', 'myApp');
-// or
+// или
 localStorage.debuggerNamespace = 'myApp';
 
 const debug = createDebugger();
@@ -140,7 +140,7 @@ debug('Hello world');
 // myApp Hello world
 ```
 
-Disabling the namespace from the environment variable and local storage.
+Отключение пространства имен из переменной окружения и локального хранилища.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -155,7 +155,7 @@ debug2('Hello world');
 // Hello world
 ```
 
-Extension of namespace segments.
+Расширение сегментов пространства имен.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -171,7 +171,7 @@ debug3('Hello world');
 // myApp:myService Hello world
 ```
 
-Usage of a static hash.
+Использование статичного хэша.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -189,7 +189,7 @@ debug2('Hi Tommy');
 // ier0 Hi Tommy
 ```
 
-Definition of the hash length.
+Определение длины хэша.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -201,7 +201,7 @@ debug('Hi Tommy');
 // we1gf4uyc4dj8f0 Hi Tommy
 ```
 
-Usage of offsets.
+Использование смещений.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -220,7 +220,7 @@ debug4('Hello world');
 // myApp       Hello world
 ```
 
-Combining methods.
+Комбинирование методов.
 
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
@@ -252,96 +252,96 @@ debugWo1.inspect('Participant contacts found:', contact);
 // myApp:myService:o3pk     }
 ```
 
-## Output Control
+## Управление выводом
 
-By default, calls to the `debug` function output nothing. To see debug
-messages, it is required to specify the exact namespaces of interest. This is
-done using a special pattern. The enabling mechanism depends on the runtime
-environment.
+По умолчанию вызовы функции `debug` ничего не выводят. Чтобы увидеть отладочные
+сообщения, необходимо указать, какие именно пространства имен вас интересуют.
+Это делается с помощью специального паттерна (шаблона). Механизм включения
+зависит от среды выполнения.
 
-### Node.js: The DEBUG Environment Variable
+### Node.js: Переменная окружения `DEBUG`
 
-In the Node.js environment, the `DEBUG` environment variable is used. It can
-be set when running the script.
+В среде Node.js используется переменная окружения DEBUG. Вы можете установить
+её при запуске вашего скрипта.
 
 ```bash
-# enable a specific namespace
+# включить конкретное пространство имен
 DEBUG=myApp node your-script.js
 
-# enable all namespaces starting with 'myApp:'
+# включить все пространства имен, начинающиеся с 'myApp:'
 DEBUG=myApp:* node your-script.js
 
-# enable multiple namespaces separated by a comma
+# включить несколько пространств имен через запятую
 DEBUG=myApp:service,lib:utils node your-script.js
-# quotes are required if spaces are used
+# если используете пробелы, нужны кавычки
 DEBUG="myApp:service lib:utils" node your-script.js
 
-# enable ALL namespaces
+# включить ВСЕ пространства имен
 DEBUG=* node your-script.js
 ```
 
-### Browser: localStorage.debug
+### Браузер: localStorage.debug
 
-In web browsers, the `debug` key of the local storage is used to control the
-output. The value of this key can be set via the developer console.
+В веб-браузерах для управления выводом используется ключ `debug` локального
+хранилища. Значение данного ключа можно установить через консоль разработчика.
 
 ```js
-// enable a specific namespace
+// включить конкретное пространство имен
 localStorage.debug = 'myApp';
 
-// enable all namespaces starting with 'myApp:'
+// включить все пространства имен, начинающиеся с 'myApp:'
 localStorage.debug = 'myApp:*';
 
-// enable multiple namespaces separated by a comma or space
+// включить несколько (через запятую или пробел)
 localStorage.debug = 'myApp:service,lib:utils';
-// or
+// или
 localStorage.debug = 'myApp:service lib:utils';
 
-// enable ALL namespaces
+// включить ВСЕ
 localStorage.debug = '*';
 
-// disable output
+// отключить вывод
 localStorage.removeItem('debug');
-// or
+// или
 localStorage.debug = '';
 ```
 
-*i. After changing `localStorage.debug`, a page reload is usually required
-for the changes to take effect.*
+*i. После изменения `localStorage.debug` обычно требуется перезагрузить
+страницу, чтобы изменения вступили в силу.*
 
-### Pattern Syntax
+### Синтаксис паттернов
 
-- Exact match (e.g., `myApp:myService`);
-- Wildcard (`*`): `myApp*` matches `myApp`, `myApp:myService`, etc.;
-- Multiple patterns can be specified by separating them with a comma or space;
-- Enable all: `*` enables output for all namespaces;
+- Точное совпадение (например, `myApp:myService`);
+- Wildcard (\*): `myApp*` соответствует `myApp`, `myApp:myService` и т.д.;
+- Несколько паттернов можно указать разделив их запятой или пробелом;
+- Включить всё: `*` включает вывод для всех пространств имен;
 
-Pattern examples in the Node.js environment:
+Примеры шаблонов в окружении Node.js:
 
 ```bash
-node main.js # outputs nothing
-DEBUG=* node main.js # outputs all messages
-DEBUG=app node main.js # only the app namespace
-DEBUG=app:* node main.js # namespaces with the app: prefix
-DEBUG=app:worker,legacy node main.js # only app:worker and legacy
+node main.js # ничего не выведет
+DEBUG=* node main.js # выведет все сообщения
+DEBUG=app node main.js # только пространство имен app
+DEBUG=app:* node main.js # пространства имен с префиксом app:
+DEBUG=app:worker,legacy node main.js # только app:worker и legacy
 ```
 
-## Debuggable Class
+## Класс Debuggable
 
-The class implements the `getDebuggerFor(method: Function)` method, which takes
-any other method of the descendant of this class and returns a new debugger
-configured so that the debugger namespace contains the class name, the method
-name, and a hash allowing differentiation of debug messages of the same method
-in different calls.
+Класс реализует метод `getDebuggerFor(method: Function)`, который принимает
+любой другой метод потомка данного класса и возвращает новый отладчик,
+сконфигурированный так, чтобы пространство имен отладчика содержало название
+класса, название метода и хэш, позволяющий различать сообщения отладки
+одного и того же метода в разных вызовах.
 
 ```
-┌──────────────────────────────────────┐
-│ class      | method     | call hash  │
-" calculator : multiply   : ds83       "
-└──────────────────────────────────────┘
+┌────────────────────────────────────┐
+│ класс      | метод    | хэш вызова │
+" calculator : multiply : ds83       "
+└────────────────────────────────────┘
 ```
 
-Instance creation is automatically logged.
+Создание экземпляра автоматически логируется.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
@@ -352,7 +352,7 @@ new MyClass();
 // myClass:constructor:f12s Instantiated.
 ```
 
-An example of outputting debug messages of two methods of the same class.
+Пример вывода сообщений отладки двух методов одного класса.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
@@ -378,8 +378,8 @@ class Calculator extends Debuggable {
 }
 
 const calculator = new Calculator();
-calculator.multiply(4, 8);  // first call (hash: 4d8w)
-calculator.multiply(6, 10); // repeated call (hash: v54w)
+calculator.multiply(4, 8);  // первый вызов (хэш: 4d8w)
+calculator.multiply(6, 10); // повторный вызов (хэш: v54w)
 calculator.divide(32, 8);
 calculator.divide(60, 10);
 // calculator:constructor:ds83 Instantiated.
@@ -393,7 +393,7 @@ calculator.divide(60, 10);
 // calculator:divide:twq2 Result 6.
 ```
 
-Usage of the `DEBUGGER_NAMESPACE` environment variable.
+Использование переменной окружения `DEBUGGER_NAMESPACE`.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
@@ -420,16 +420,15 @@ calculator.multiply(4, 8);
 
 ### DebuggableOptions
 
-The first argument of the `Debuggable` class takes an object with the
-following properties.
+Первый аргумент класса `Debuggable` принимает объект со следующими свойствами.
 
-- `namespace?: string` - prefix namespace;
-- `noGlobalNamespace?: boolean` - ignore global namespaces;
-- `noInstantiationMessage?: boolean` - do not output the instantiation message;
+- `namespace?: string` - префиксное пространство имен;
+- `noGlobalNamespace?: boolean` - игнорировать глобальные пространства имен;
+- `noInstantiationMessage?: boolean` - не выводить сообщение о создании экземпляра;
 
 #### DebuggableOptions.namespace
 
-The value of the `namespace` option adds a prefix namespace.
+Значение опции `namespace` добавляет префиксное пространство имен.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
@@ -459,26 +458,26 @@ calculator.multiply(4, 8);
 
 #### DebuggableOptions.noGlobalNamespace
 
-The `true` value of the `noGlobalNamespace` option allows ignoring global
-namespaces from environment variables (on the server) and local storage
-(in the browser). An example of using this option is shown below.
+Значение `true` опции `noGlobalNamespace` позволяет игнорировать глобальные
+пространства имен из переменных окружения (на сервере) и локального хранилища
+(в браузере). Ниже показан пример использования данной опции.
 
 ```js
 import {Debuggable} from '@e22m4u/js-debug';
 
-// definition of the message output pattern to the console,
-// the "*" symbol for outputting all messages
+// определение шаблона вывода сообщений в консоль,
+// символ "*" для вывода всех сообщений
 process.env['DEBUG'] = '*';
 
-// setting the global namespace
-// for the entire application
+// установка глобального пространства
+// имен для всего приложения
 process.env['DEBUGGER_NAMESPACE'] = 'myApp';
 
 class Calculator extends Debuggable {
   constructor() {
     super({
-      // the DEBUGGER_NAMESPACE variable will be
-      // ignored for this instance
+      // переменная DEBUGGER_NAMESPACE будет
+      // проигнорирована для данного экземпляра
       noGlobalNamespace: true,
     });
   }
@@ -499,12 +498,12 @@ calculator.multiply(4, 8);
 // calculator:multiply:4d8w Result 32.
 ```
 
-## Tests
+## Тесты
 
 ```bash
 npm run test
 ```
 
-## License
+## Лицензия
 
 MIT
