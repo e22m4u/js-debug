@@ -1,7 +1,7 @@
 {
   "name": "@e22m4u/js-debug",
   "version": "0.5.0",
-  "description": "A debug logging utility for JavaScript",
+  "description": "Утилита вывода сообщений отладки для JavaScript",
   "author": "Mikhail Evstropov <e22m4u@yandex.ru>",
   "license": "MIT",
   "keywords": [
