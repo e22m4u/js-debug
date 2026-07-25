@@ -94,7 +94,7 @@ debug.inspect('Order details:', {
 //   {
 //     orderId: 988,
 //     date: '2023-10-27',
-//     totalAmount: 120.50,
+//     totalAmount: 120.5
 //   }
 ```
 
@@ -212,18 +212,15 @@ debug('Hi Tommy');
 ```js
 import {createDebugger} from '@e22m4u/js-debug';
 
-const debug1 = createDebugger().withOffset(1);
-const debug2 = createDebugger().withOffset(2);
-const debug3 = createDebugger().withOffset(3);
-const debug4 = createDebugger('myApp').withOffset(3);
+const debug1 = createDebugger();
+const debug2 = createDebugger().withOffset(1);
+const debug3 = createDebugger().withOffset(2);
 debug1('Hello world');
 debug2('Hello world');
 debug3('Hello world');
-debug4('Hello world');
 // Hello world
 //   Hello world
 //     Hello world
-// myApp       Hello world
 ```
 
 Комбинирование методов.
@@ -254,7 +251,7 @@ debugWo1.inspect('Participant contacts found:', contact);
 // myApp:myService:o3pk       phone: {
 // myApp:myService:o3pk         mobile: '+1-555-123-4567',
 // myApp:myService:o3pk         home: '+1-555-987-6543'
-// myApp:myService:o3pk       },
+// myApp:myService:o3pk       }
 // myApp:myService:o3pk     }
 ```
 
@@ -368,17 +365,17 @@ process.env['DEBUG'] = '*';
 class Calculator extends Debuggable {
   multiply(a, b) {
     const debug = this.getDebuggerFor(this.multiply); // <=
-    debug('Multiplying %v by %v.');
+    debug('Multiplying %v by %v.', a, b);
     const res = a * b;
-    debug('Result %v.');
+    debug('Result %v.', res);
     return res;
   }
 
   divide(a, b) {
     const debug = this.getDebuggerFor(this.divide); // <=
-    debug('Dividing %v by %v.');
+    debug('Dividing %v by %v.', a, b);
     const res = a / b;
-    debug('Result %v.');
+    debug('Result %v.', res);
     return res;
   }
 }
@@ -410,9 +407,9 @@ process.env['DEBUG'] = 'myApp*';
 class Calculator extends Debuggable {
   multiply(a, b) {
     const debug = this.getDebuggerFor(this.multiply);
-    debug('Multiplying %v by %v.');
+    debug('Multiplying %v by %v.', a, b);
     const res = a * b;
-    debug('Result %v.');
+    debug('Result %v.', res);
     return res;
   }
 }
@@ -448,9 +445,9 @@ class Calculator extends Debuggable {
 
   multiply(a, b) {
     const debug = this.getDebuggerFor(this.multiply);
-    debug('Multiplying %v by %v.');
+    debug('Multiplying %v by %v.', a, b);
     const res = a * b;
-    debug('Result %v.');
+    debug('Result %v.', res);
     return res;
   }
 }
@@ -490,9 +487,9 @@ class Calculator extends Debuggable {
 
   multiply(a, b) {
     const debug = this.getDebuggerFor(this.multiply);
-    debug('Multiplying %v by %v.');
+    debug('Multiplying %v by %v.', a, b);
     const res = a * b;
-    debug('Result %v.');
+    debug('Result %v.', res);
     return res;
   }
 }
